@@ -27,9 +27,9 @@ export function parseTextLine(lineLeft: string, clozeNumber: number): { result: 
     // 1. one - two => 1. {{c1::::one }} - {{c1::two }}
     // 1. one - two => 1. {{c1::::one }} = {{c1::two }}
     const ALLOWED_BULLETS = ["\\d*\\.", "-"];
-    const ALLOWED_SEPARATORS = ["-", "="];
-    const PARSED_BULLET_REGEX = ALLOWED_BULLETS.reduce((a, b) => a + "|" + b, "").substring(1) // Concatenate possible bullets with |
-    const PARSED_SEPARATOR_REGEX = ALLOWED_SEPARATORS.reduce((a, b) => a + "|" + b, "").substring(1) // Concatenate possible bullets with |
+    const ALLOWED_SEPARATORS = ["-", "="]; 
+    const PARSED_BULLET_REGEX = ALLOWED_BULLETS.join("|"); // Concatenate possible bullets with |
+    const PARSED_SEPARATOR_REGEX = ALLOWED_SEPARATORS.join("|"); // Concatenate possible bullets with |
     // const plainText_regex = /(?<=^\s*)(?<bullet>\d*\.|-)\s+(?<front>(?:(?!( = | - )).)*)\s+(?<separator>-|=)\s+(?<back>.*)/
     const BULLET_SEPARATOR_REGEX = new RegExp("(?<=^\\s*)(?<bullet>"
         + PARSED_BULLET_REGEX
