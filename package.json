@@ -4,7 +4,7 @@
   "description": "",
   "main": "anki_clozify_formatter.js",
   "scripts": {
-    "build": "tsc --watch",
+    "build": "webpack -w",
     "test": "jest"
   },
   "jest": {
