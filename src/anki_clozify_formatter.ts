@@ -2,7 +2,7 @@ import PlainTextParser from "./TextParser";
 
 const plainTextParser = PlainTextParser.get();
 
-function parse(text: string): string {
+export default function parse(text: string): string {
     let clozeNumber = 1;
     let resultLines = [""]
 
@@ -18,13 +18,5 @@ function parse(text: string): string {
 
     return resultLines.join("\n");
 }
-
-console.log(parse(
-`
-- Hello i had a good day - sdffsd
-1. sdfsdfsdf - sdfsdfsdf
-    - sdfsdfdfs - sdfsdffsd
-`
-))
 
 module.exports = parse;

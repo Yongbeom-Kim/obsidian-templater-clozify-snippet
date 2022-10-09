@@ -2,6 +2,7 @@ export interface LineParser {
     parseLine(line: string, clozeNumber: number): ParseOutput;
 }
 
+
 export enum STATE {
     TEXT,
     INLINE_LATEX,
