@@ -47,7 +47,7 @@
   var plainTextParser = PlainTextParser.get();
   function parse(text) {
     let clozeNumber = 1;
-    let resultLines = [""];
+    let resultLines = [];
     while (text.length > 0) {
       const nextLine = text.slice(0, /$/m.exec(text).index).trim();
       text = text.slice(/$/m.exec(text).index).trim();
