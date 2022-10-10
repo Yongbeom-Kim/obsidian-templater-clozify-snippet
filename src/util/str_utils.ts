@@ -1,53 +1,31 @@
 /**
- * Get the substring after the first match of a regular expression.
- * Note: Check that the regular expression matches the string before using this method.
- * @param str string to parse
- * @param query regular expression
- * @returns substring after if regex exists, null otherwise.
+ * Partitions a given string by a delimiter by its first occurrence
+ * @param str string to partition
+ * @param delimiter
+ * @returns {left: string, right: string} object, right string is empty if no delimiter found
  */
-export function getSubStringAfter(str: string, query: RegExp | string): string {
-    if (query instanceof RegExp) {
-        if (!query.test(str)) {
-            return "";
-        }
-        const regMatchInfo = query.exec(str)
-        // We can put all the ! here cause string is already tested
-        return str.substring(regMatchInfo!.index + regMatchInfo![0]!.length);
-    } else if (typeof query === "string") {
-        if (!str.includes(query)) {
-            return str;
-        }
-        return str.substring(str.indexOf(query) + query.length);
-    } else {
-        throw new Error("Invalid query type");
-    }
+export function partition(str: string, delimiter: string): {left: string, right: string} {
+    const splitString: string[] = str.split(delimiter);
+
+    return {
+        left: splitString[0] ?? "", 
+        right: splitString?.slice(1)?.join(delimiter) ?? ""
+    };
 }
 
 /**
- * Get the substring before the first match of a regular expression or string.
- * Note: Check that the regular expression matches the string before using this method.
- * @param str string to parse
- * @param query regular expression or string
- * @returns substring after if query in string, the string itself otherwise.
+ * Partitions a given string by a delimiter by its first occurrence
+ * @param str string to partition
+ * @param delimiter
+ * @returns {left: string, right: string} object, left string is empty if no delimiter found
  */
- export function getSubStringBefore(str: string, query: RegExp | string) {
-    // console.log({str, query});
-    if (query instanceof RegExp) {
-        if (!query.test(str)) {
-            return str;
-        }
-        const regMatchInfo = query.exec(str)
-        // We can put all the ! here cause string is already tested
-        return str.substring(0, regMatchInfo!.index);
+export function lastPartition(str: string, delimiter: string): {left: string, right: string} {
+    const splitString = str.split(delimiter);
 
-    } else if (typeof (query) === "string") {
-        if (!str.includes(query)) {
-            return str;
-        }
-        return str.substring(0, str.indexOf(query));
-    } else {
-        throw new Error("Invalid query type");
-    }
+    return {
+        left: splitString?.slice(0, -1)?.join(delimiter) ?? "",
+        right: splitString[splitString.length - 1] ?? ""
+    };
 }
 
 /**

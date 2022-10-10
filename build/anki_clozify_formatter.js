@@ -1,37 +1,19 @@
 "use strict";
 (() => {
   // src/util/str_utils.ts
-  function getSubStringAfter(str, query) {
-    if (query instanceof RegExp) {
-      if (!query.test(str)) {
-        return "";
-      }
-      const regMatchInfo = query.exec(str);
-      return str.substring(regMatchInfo.index + regMatchInfo[0].length);
-    } else if (typeof query === "string") {
-      if (!str.includes(query)) {
-        return str;
-      }
-      return str.substring(str.indexOf(query) + query.length);
-    } else {
-      throw new Error("Invalid query type");
-    }
+  function partition(str, delimiter) {
+    const splitString = str.split(delimiter);
+    return {
+      left: splitString[0] ?? "",
+      right: splitString?.slice(1)?.join(delimiter) ?? ""
+    };
   }
-  function getSubStringBefore(str, query) {
-    if (query instanceof RegExp) {
-      if (!query.test(str)) {
-        return str;
-      }
-      const regMatchInfo = query.exec(str);
-      return str.substring(0, regMatchInfo.index);
-    } else if (typeof query === "string") {
-      if (!str.includes(query)) {
-        return str;
-      }
-      return str.substring(0, str.indexOf(query));
-    } else {
-      throw new Error("Invalid query type");
-    }
+  function lastPartition(str, delimiter) {
+    const splitString = str.split(delimiter);
+    return {
+      left: splitString?.slice(0, -1)?.join(delimiter) ?? "",
+      right: splitString[splitString.length - 1] ?? ""
+    };
   }
   function countDistinctSubstring(str, substring) {
     return str.split(substring).length - 1;
@@ -70,20 +52,26 @@
         ALLOWED_SEPARATORS
       ));
     }
+    if (back?.trim()?.length === 0) {
+      return {
+        result: line,
+        clozeNumber,
+        state: 0 /* TEXT */
+      };
+    }
     return {
-      result: `${bullet} c${clozeNumber}::::{{${front}}} ${separator} c${clozeNumber}::{{${back}}}`,
+      result: `${bullet} c${clozeNumber}::::{{ ${front} }} ${separator} c${clozeNumber}::{{ ${back} }}`,
       clozeNumber: clozeNumber + 1,
       state: 0 /* TEXT */
     };
   }
   function shiftSeparatorToNextDelimiter(front, current_separator, back, delimiter, possible_separators) {
-    console.log({ front, back });
-    front += " " + current_separator + " " + getSubStringBefore(back, delimiter) + delimiter;
-    back = getSubStringAfter(back, new RegExp(delimiter));
+    front += " " + current_separator + " " + lastPartition(back, delimiter).left + delimiter;
+    back = lastPartition(back, delimiter).right;
     let substring_to_transfer;
     let new_separator;
     possible_separators.forEach((sep) => {
-      const substring = getSubStringBefore(back, new RegExp(delimiter));
+      const substring = partition(back, sep).left;
       if (substring_to_transfer === void 0 || substring_to_transfer.length > substring.length) {
         substring_to_transfer = substring;
         new_separator = sep;
@@ -92,8 +80,8 @@
     if (substring_to_transfer === void 0 || new_separator === void 0) {
       throw new Error("Delimiter could not be found");
     }
-    front += substring_to_transfer;
-    back = getSubStringAfter(back, new RegExp(new_separator));
+    front += partition(back, new_separator).left;
+    back = partition(back, new_separator).right;
     return {
       front,
       separator: new_separator,
@@ -125,5 +113,8 @@
     return resultLines.join("\n");
   }
   module.exports = parse;
-  console.log(parse(`- sdfsdsdfsdf $$sdfdfs - dfsdfs$$ asdf - sdfsfsd`));
+  console.log(parse(`- one = four`));
+  console.log(parse(`- one $$two - three$$ = four`));
+  console.log(parse(`- one $$two - three$$ asdf $$four - four$$ - five`));
+  console.log(parse(`- one $$two - three$$ asdf $$four - four$$ = five`));
 })();

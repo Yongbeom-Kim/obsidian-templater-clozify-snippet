@@ -35,4 +35,7 @@ export default function parse(text: string): string {
 
 module.exports = parse;
 
-console.log(parse(`- sdfsdsdfsdf $$sdfdfs - dfsdfs$$ asdf - sdfsfsd`))
+console.log(parse(`- one = four`))
+console.log(parse(`- one $$two - three$$ = four`))
+console.log(parse(`- one $$two - three$$ asdf $$four - four$$ - five`))
+console.log(parse(`- one $$two - three$$ asdf $$four - four$$ = five`))

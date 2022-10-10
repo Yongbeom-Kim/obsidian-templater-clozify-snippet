@@ -2,7 +2,7 @@
  * An enum representing the state of text of the current character
  */
 
-import { countDistinctSubstring, getSubStringAfter, getSubStringBefore } from "../util/str_utils";
+import { countDistinctSubstring, lastPartition, partition } from "../util/str_utils";
 import { ParseOutput, STATE } from "./Parser";
 
 
@@ -20,6 +20,14 @@ const BULLET_SEPARATOR_REGEX = new RegExp(
     + "(?<separator>" + PARSED_SEPARATOR_REGEX + ")"
     + "\\s+"
     + "(?<back>.*)")
+
+// Separators within these blocks are ignored
+const BLOCK_IGNORE_SEPARATOR = [
+    {start: "$$", end: "$$"},
+    {start: "$", end: "$"},
+    {start: "\`", end: "\`"},
+];
+
 // console.log({ BULLET_SEPARATOR_REGEX })
 /**
  * When given a line of plain text to parse (not code or LaTeX), parses line into appropriate anki cloze format.
@@ -65,8 +73,16 @@ export function parseText(line: string, clozeNumber: number): ParseOutput {
                 back ?? "", "$$",
                 ALLOWED_SEPARATORS));
     }
+
+    if (back?.trim()?.length === 0) {
+        return {
+            result: line,
+            clozeNumber: clozeNumber,
+            state: STATE.TEXT
+        }
+    }
     return {
-        result: `${bullet} c${clozeNumber}::::\{\{${front}\}\} ${separator} c${clozeNumber}::\{\{${back}\}\}`,
+        result: `${bullet} c${clozeNumber}::::\{\{ ${front} \}\} ${separator} c${clozeNumber}::\{\{ ${back} \}\}`,
         clozeNumber: clozeNumber + 1,
         state: STATE.TEXT
     };
@@ -80,10 +96,9 @@ function shiftSeparatorToNextDelimiter(
     possible_separators: string[]
 ): { front: string, separator: string, back: string } {
 
-    console.log({ front, back })
     // Shift string until delimiter to the front
-    front += " " + current_separator + " " + getSubStringBefore(back, delimiter) + delimiter;
-    back = getSubStringAfter(back, new RegExp(delimiter));
+    front += " " + current_separator + " " + lastPartition(back, delimiter).left + delimiter;
+    back = lastPartition(back, delimiter).right;
 
     // Shift string until nearest possible separator to the front
     // Iterate over all possible separators, and pick the closes
@@ -91,11 +106,12 @@ function shiftSeparatorToNextDelimiter(
     let new_separator: string;
 
     possible_separators.forEach(sep => {
-        const substring = getSubStringBefore(back, new RegExp(delimiter));
+        const substring = partition(back, sep).left
         if (substring_to_transfer === undefined || substring_to_transfer.length > substring.length) {
             substring_to_transfer = substring;
             new_separator = sep;
         }
+
     });
 
     // @ts-ignore we're literally checking if it is undefined here
@@ -103,8 +119,8 @@ function shiftSeparatorToNextDelimiter(
         throw new Error("Delimiter could not be found");
     }
 
-    front += substring_to_transfer;
-    back = getSubStringAfter(back, new RegExp(new_separator));
+    front += partition(back, new_separator).left;
+    back = partition(back, new_separator).right;
 
     return {
         front,

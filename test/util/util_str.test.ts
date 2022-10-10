@@ -1,11 +1,25 @@
-import {getSubStringAfter, getSubStringBefore} from "../../src/util/str_utils";
+import {lastPartition, partition} from "../../src/util/str_utils";
 
-test("get string after regex", () => {
-    expect(getSubStringAfter("dfasafsadfs====sdfasdffasd", /====/)).toBe("sdfasdffasd");
-    expect(getSubStringAfter("dfasafsadfs====sdfasdffasd", "====")).toBe("sdfasdffasd");
+test("first partition", () => {
+    expect(partition("a-b-c-d-e-f-g", "-")).toEqual({
+        left: "a",
+        right:"b-c-d-e-f-g"
+    })
+
+    expect(partition("asdfdfs", "-")).toEqual({
+        left: "asdfdfs",
+        right:""
+    })
 })
 
-test("get string before regex", () => {
-    expect(getSubStringBefore("dfasafsadfs====sdfasdffasd", /====/)).toBe("dfasafsadfs");
-    expect(getSubStringBefore("dfasafsadfs====sdfasdffasd", "====")).toBe("dfasafsadfs");
+test("last partition", () => {
+    expect(lastPartition("a-b-c-d-e-f-g", "-")).toEqual({
+        left: "a-b-c-d-e-f",
+        right:"g"
+    })
+    
+    expect(lastPartition("asdfdfs", "-")).toEqual({
+        left: "",
+        right:"asdfdfs"
+    })
 })
