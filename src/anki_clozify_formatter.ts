@@ -1,5 +1,5 @@
-import { ParseOutput, STATE } from "./parser/Parser";
-import { parseLine as parseTextLine } from "./parser/TextParser";
+import { STATE } from "./parser/Parser";
+import { parseText as parseTextLine } from "./parser/TextParser";
 
 export default function parse(text: string): string {
     let clozeNumber = 1;
@@ -30,7 +30,9 @@ export default function parse(text: string): string {
         ({clozeNumber, state: currentState} = parsedObject);
     }
 
-    return resultLines.join("");
+    return resultLines.join("\n");
 }
 
 module.exports = parse;
+
+console.log(parse(`- sdfsdsdfsdf $$sdfdfs - dfsdfs$$ asdf - sdfsfsd`))

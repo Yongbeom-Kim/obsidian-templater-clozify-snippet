@@ -2,7 +2,8 @@
  * An enum representing the state of text of the current character
  */
 
-import { LineParser, ParseOutput, STATE } from "./Parser";
+import { countDistinctSubstring, getSubStringAfter, getSubStringBefore } from "../util/str_utils";
+import { ParseOutput, STATE } from "./Parser";
 
 
 const ALLOWED_BULLETS = ["\\d*\\.", "-"];
@@ -19,7 +20,7 @@ const BULLET_SEPARATOR_REGEX = new RegExp(
     + "(?<separator>" + PARSED_SEPARATOR_REGEX + ")"
     + "\\s+"
     + "(?<back>.*)")
-
+// console.log({ BULLET_SEPARATOR_REGEX })
 /**
  * When given a line of plain text to parse (not code or LaTeX), parses line into appropriate anki cloze format.
  * 
@@ -33,7 +34,7 @@ const BULLET_SEPARATOR_REGEX = new RegExp(
  * @param clozeNumber current Cloze number
  * @returns 
  */
-export function parseLine(line: string, clozeNumber: number): ParseOutput {
+export function parseText(line: string, clozeNumber: number): ParseOutput {
     // Line cannot contain newline
     if (/\n/.test(line)) {
         throw new Error("Line cannot contain \\n. Line is " + line)
@@ -42,28 +43,72 @@ export function parseLine(line: string, clozeNumber: number): ParseOutput {
     if (clozeNumber < 1) {
         throw new Error("Cloze number cannot be less than 1")
     }
+    // console.log(line + "\n");
 
     const matchedGroups = line.match(BULLET_SEPARATOR_REGEX)?.groups ?? null;
 
     if (matchedGroups === null) {
         return {
-            result: line + "\n",
+            result: line,
             clozeNumber: clozeNumber,
             state: STATE.TEXT
         };
     }
 
-    const { bullet, front, separator, back } = matchedGroups;
+    let { bullet, front, separator, back } = matchedGroups;
 
+    if (countDistinctSubstring(front ?? "", "$$") % 2 === 1) {
+        ({ front, separator, back }
+            = shiftSeparatorToNextDelimiter(
+                front ?? "",
+                separator ?? "",
+                back ?? "", "$$",
+                ALLOWED_SEPARATORS));
+    }
     return {
-        result: `${bullet} c${clozeNumber}::::\{\{${front}\}\} ${separator} c${clozeNumber}::\{\{${back}\}\}\n`,
+        result: `${bullet} c${clozeNumber}::::\{\{${front}\}\} ${separator} c${clozeNumber}::\{\{${back}\}\}`,
         clozeNumber: clozeNumber + 1,
         state: STATE.TEXT
     };
 }
 
-function main() {
+function shiftSeparatorToNextDelimiter(
+    front: string,
+    current_separator: string,
+    back: string,
+    delimiter: string,
+    possible_separators: string[]
+): { front: string, separator: string, back: string } {
 
+    console.log({ front, back })
+    // Shift string until delimiter to the front
+    front += " " + current_separator + " " + getSubStringBefore(back, delimiter) + delimiter;
+    back = getSubStringAfter(back, new RegExp(delimiter));
+
+    // Shift string until nearest possible separator to the front
+    // Iterate over all possible separators, and pick the closes
+    let substring_to_transfer: string;
+    let new_separator: string;
+
+    possible_separators.forEach(sep => {
+        const substring = getSubStringBefore(back, new RegExp(delimiter));
+        if (substring_to_transfer === undefined || substring_to_transfer.length > substring.length) {
+            substring_to_transfer = substring;
+            new_separator = sep;
+        }
+    });
+
+    // @ts-ignore we're literally checking if it is undefined here
+    if (substring_to_transfer === undefined || new_separator === undefined) {
+        throw new Error("Delimiter could not be found");
+    }
+
+    front += substring_to_transfer;
+    back = getSubStringAfter(back, new RegExp(new_separator));
+
+    return {
+        front,
+        separator: new_separator,
+        back
+    };
 }
-
-main();

@@ -5,6 +5,8 @@ export interface LineParser {
 
 export enum STATE {
     TEXT,
+    INLINE_LATEX,
+    INLINE_CODE,
     MULTI_LINE_LATEX,
     MULTI_LINE_CODE
 }
