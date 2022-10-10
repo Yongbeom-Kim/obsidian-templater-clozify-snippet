@@ -1,5 +1,58 @@
 "use strict";
 (() => {
+  // src/parser/Parser.ts
+  var CODE_STATUS = class {
+    static notCode() {
+      return new CODE_STATUS(CODE_LANGUAGE.NONE);
+    }
+    constructor(language, prevLineIsComment = false) {
+      this.language = language;
+      this.prevLineIsComment = prevLineIsComment;
+    }
+    getCommentHeaderRegex() {
+      switch (this.language) {
+        case CODE_LANGUAGE.NONE:
+        default:
+          return ["#", "//"];
+        case CODE_LANGUAGE.PYTHON:
+          return ["#"];
+        case CODE_LANGUAGE.CPP:
+          return ["//"];
+        case CODE_LANGUAGE.JAVA:
+          return ["//"];
+        case CODE_LANGUAGE.SQL:
+          return ["--"];
+        case CODE_LANGUAGE.PLSQL:
+          return ["--"];
+      }
+    }
+    static getLanguageFromAlias(alias) {
+      switch (alias) {
+        case "sql":
+          return CODE_LANGUAGE.SQL;
+        case "plsql":
+          return CODE_LANGUAGE.PLSQL;
+        case "python":
+          return CODE_LANGUAGE.PYTHON;
+        case "cpp":
+          return CODE_LANGUAGE.CPP;
+        case "java":
+          return CODE_LANGUAGE.JAVA;
+        default:
+          return CODE_LANGUAGE.NONE;
+      }
+    }
+  };
+  var CODE_LANGUAGE = /* @__PURE__ */ ((CODE_LANGUAGE2) => {
+    CODE_LANGUAGE2[CODE_LANGUAGE2["NONE"] = 0] = "NONE";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["PYTHON"] = 1] = "PYTHON";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["CPP"] = 2] = "CPP";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["JAVA"] = 3] = "JAVA";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["SQL"] = 4] = "SQL";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["PLSQL"] = 5] = "PLSQL";
+    return CODE_LANGUAGE2;
+  })(CODE_LANGUAGE || {});
+
   // src/util/str_utils.ts
   function partition(str, delimiter) {
     const splitString = str.split(delimiter);
@@ -39,7 +92,8 @@
       return {
         result: line,
         clozeNumber,
-        state: 0 /* TEXT */
+        state: 0 /* TEXT */,
+        codeStatus: CODE_STATUS.notCode()
       };
     }
     let { bullet, front, separator, back } = matchedGroups;
@@ -56,13 +110,15 @@
       return {
         result: line,
         clozeNumber,
-        state: 0 /* TEXT */
+        state: 0 /* TEXT */,
+        codeStatus: CODE_STATUS.notCode()
       };
     }
     return {
       result: `${bullet} c${clozeNumber}::::{{ ${front} }} ${separator} c${clozeNumber}::{{ ${back} }}`,
       clozeNumber: clozeNumber + 1,
-      state: 0 /* TEXT */
+      state: 0 /* TEXT */,
+      codeStatus: CODE_STATUS.notCode()
     };
   }
   function shiftSeparatorToNextDelimiter(front, current_separator, back, delimiter, possible_separators) {

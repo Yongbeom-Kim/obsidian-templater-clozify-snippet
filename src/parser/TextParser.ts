@@ -3,7 +3,7 @@
  */
 
 import { countDistinctSubstring, lastPartition, partition } from "../util/str_utils";
-import { ParseOutput, STATE } from "./Parser";
+import { CODE_STATUS, ParseOutput, STATE } from "./Parser";
 
 
 const ALLOWED_BULLETS = ["\\d*\\.", "-"];
@@ -59,7 +59,8 @@ export function parseText(line: string, clozeNumber: number): ParseOutput {
         return {
             result: line,
             clozeNumber: clozeNumber,
-            state: STATE.TEXT
+            state: STATE.TEXT,
+            codeStatus: CODE_STATUS.notCode()
         };
     }
 
@@ -78,13 +79,15 @@ export function parseText(line: string, clozeNumber: number): ParseOutput {
         return {
             result: line,
             clozeNumber: clozeNumber,
-            state: STATE.TEXT
+            state: STATE.TEXT,
+            codeStatus: CODE_STATUS.notCode()
         }
     }
     return {
         result: `${bullet} c${clozeNumber}::::\{\{ ${front} \}\} ${separator} c${clozeNumber}::\{\{ ${back} \}\}`,
         clozeNumber: clozeNumber + 1,
-        state: STATE.TEXT
+        state: STATE.TEXT,
+        codeStatus: CODE_STATUS.notCode()
     };
 }
 

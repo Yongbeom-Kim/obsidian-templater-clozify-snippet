@@ -1,24 +1,29 @@
-import { STATE } from "./parser/Parser";
+import { partition } from "./util/str_utils";
+import { parseMultiLineCode } from "parser/CodeParser";
+import { CODE_STATUS, STATE } from "./parser/Parser";
 import { parseText as parseTextLine } from "./parser/TextParser";
 
 export default function parse(text: string): string {
     let clozeNumber = 1;
     let currentState: STATE = STATE.TEXT;
-
+    let codeStatus = CODE_STATUS.notCode();
+    let nextLine;
     let resultLines = []
 
     while (text.length > 0) {
         // Get next line
         // TODO: Null safety here
-        const nextLine: string = text.slice(0, (/$/m).exec(text)!.index).trim();
-        text = text.slice((/$/m).exec(text)!.index).trim();
+        ({ left: nextLine, right: text } = partition(text, "\n"));
 
+        // const nextLine: string = text.slice(0, (/$/m).exec(text)!.index).trim();
+        // text = text.slice((/$/m).exec(text)!.index).trim();
+        
         let parsedObject;
         if (currentState === STATE.TEXT) {
             parsedObject = parseTextLine(nextLine, clozeNumber);
         } else if (currentState === STATE.MULTI_LINE_CODE) {
             // TODO: parse multi line code
-            parsedObject = parseTextLine(nextLine, clozeNumber);
+            parsedObject = parseMultiLineCode(nextLine, partition(nextLine, "\n").left, clozeNumber, codeStatus);
         } else if (currentState === STATE.MULTI_LINE_LATEX) {
             // TODO: parse multi line latex
             parsedObject = parseTextLine(nextLine, clozeNumber);
@@ -27,7 +32,7 @@ export default function parse(text: string): string {
         }
 
         resultLines.push(parsedObject.result);
-        ({clozeNumber, state: currentState} = parsedObject);
+        ({clozeNumber, state: currentState, codeStatus} = parsedObject);
     }
 
     return resultLines.join("\n");
