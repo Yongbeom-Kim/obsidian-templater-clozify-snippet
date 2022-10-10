@@ -1,5 +1,5 @@
-import { ParseOutput, STATE } from "./Parser";
-import { parseLine as parseTextLine } from "./TextParser";
+import { ParseOutput, STATE } from "./modules/Parser";
+import { parseLine as parseTextLine } from "./modules/TextParser";
 
 export default function parse(text: string): string {
     let clozeNumber = 1;
