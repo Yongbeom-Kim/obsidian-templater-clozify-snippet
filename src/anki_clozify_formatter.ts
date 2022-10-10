@@ -30,7 +30,7 @@ export default function parse(text: string): string {
         ({clozeNumber, state: currentState} = parsedObject);
     }
 
-    return resultLines.join("\n");
+    return resultLines.join("");
 }
 
 module.exports = parse;

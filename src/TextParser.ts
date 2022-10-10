@@ -38,7 +38,6 @@ export function parseLine(line: string, clozeNumber: number): ParseOutput {
     if (/\n/.test(line)) {
         throw new Error("Line cannot contain \\n. Line is " + line)
     }
-
     // Cloze number cannot be less than 1
     if (clozeNumber < 1) {
         throw new Error("Cloze number cannot be less than 1")
@@ -48,7 +47,7 @@ export function parseLine(line: string, clozeNumber: number): ParseOutput {
 
     if (matchedGroups === null) {
         return {
-            result: line,
+            result: line + "\n",
             clozeNumber: clozeNumber,
             state: STATE.TEXT
         };
@@ -57,7 +56,7 @@ export function parseLine(line: string, clozeNumber: number): ParseOutput {
     const { bullet, front, separator, back } = matchedGroups;
 
     return {
-        result: `${bullet} c${clozeNumber}::::\{\{${front}\}\} ${separator} c${clozeNumber}::\{\{${back}\}\}`,
+        result: `${bullet} c${clozeNumber}::::\{\{${front}\}\} ${separator} c${clozeNumber}::\{\{${back}\}\}\n`,
         clozeNumber: clozeNumber + 1,
         state: STATE.TEXT
     };
