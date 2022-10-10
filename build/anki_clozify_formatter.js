@@ -1,6 +1,6 @@
 "use strict";
 (() => {
-  // src/modules/TextParser.ts
+  // src/parser/TextParser.ts
   var ALLOWED_BULLETS = ["\\d*\\.", "-"];
   var ALLOWED_SEPARATORS = ["-", "="];
   var PARSED_BULLET_REGEX = ALLOWED_BULLETS.join("|");
