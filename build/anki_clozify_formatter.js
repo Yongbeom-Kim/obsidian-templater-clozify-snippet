@@ -1,58 +1,5 @@
 "use strict";
 (() => {
-  // src/parser/Parser.ts
-  var CODE_STATUS = class {
-    static notCode() {
-      return new CODE_STATUS(CODE_LANGUAGE.NONE);
-    }
-    constructor(language, prevLineIsComment = false) {
-      this.language = language;
-      this.prevLineIsComment = prevLineIsComment;
-    }
-    getCommentHeaderRegex() {
-      switch (this.language) {
-        case CODE_LANGUAGE.NONE:
-        default:
-          return ["#", "//"];
-        case CODE_LANGUAGE.PYTHON:
-          return ["#"];
-        case CODE_LANGUAGE.CPP:
-          return ["//"];
-        case CODE_LANGUAGE.JAVA:
-          return ["//"];
-        case CODE_LANGUAGE.SQL:
-          return ["--"];
-        case CODE_LANGUAGE.PLSQL:
-          return ["--"];
-      }
-    }
-    static getLanguageFromAlias(alias) {
-      switch (alias) {
-        case "sql":
-          return CODE_LANGUAGE.SQL;
-        case "plsql":
-          return CODE_LANGUAGE.PLSQL;
-        case "python":
-          return CODE_LANGUAGE.PYTHON;
-        case "cpp":
-          return CODE_LANGUAGE.CPP;
-        case "java":
-          return CODE_LANGUAGE.JAVA;
-        default:
-          return CODE_LANGUAGE.NONE;
-      }
-    }
-  };
-  var CODE_LANGUAGE = /* @__PURE__ */ ((CODE_LANGUAGE2) => {
-    CODE_LANGUAGE2[CODE_LANGUAGE2["NONE"] = 0] = "NONE";
-    CODE_LANGUAGE2[CODE_LANGUAGE2["PYTHON"] = 1] = "PYTHON";
-    CODE_LANGUAGE2[CODE_LANGUAGE2["CPP"] = 2] = "CPP";
-    CODE_LANGUAGE2[CODE_LANGUAGE2["JAVA"] = 3] = "JAVA";
-    CODE_LANGUAGE2[CODE_LANGUAGE2["SQL"] = 4] = "SQL";
-    CODE_LANGUAGE2[CODE_LANGUAGE2["PLSQL"] = 5] = "PLSQL";
-    return CODE_LANGUAGE2;
-  })(CODE_LANGUAGE || {});
-
   // src/util/str_utils.ts
   function partition(str, delimiter) {
     const splitString = str.split(delimiter);
@@ -72,6 +19,148 @@
     return str.split(substring).length - 1;
   }
 
+  // src/parser/Parser.ts
+  var CODE_STATUS = class {
+    static notCode() {
+      return new CODE_STATUS(CODE_LANGUAGE.NONE);
+    }
+    constructor(language, prevLineIsComment = false) {
+      this.language = language;
+      this.nextLineIsCloze = prevLineIsComment;
+    }
+    getCommentHeaders() {
+      switch (this.language) {
+        case CODE_LANGUAGE.NONE:
+        default:
+          return ["#", "//"];
+        case CODE_LANGUAGE.PYTHON:
+          return ["#"];
+        case CODE_LANGUAGE.CPP:
+        case CODE_LANGUAGE.JAVA:
+        case CODE_LANGUAGE.JAVASCRIPT:
+          return ["//"];
+        case CODE_LANGUAGE.SQL:
+        case CODE_LANGUAGE.PLSQL:
+          return ["--"];
+      }
+    }
+    static getLanguageFromAlias(alias) {
+      switch (alias) {
+        case "sql":
+          return CODE_LANGUAGE.SQL;
+        case "plsql":
+          return CODE_LANGUAGE.PLSQL;
+        case "python":
+          return CODE_LANGUAGE.PYTHON;
+        case "cpp":
+          return CODE_LANGUAGE.CPP;
+        case "java":
+          return CODE_LANGUAGE.JAVA;
+        case "js":
+          return CODE_LANGUAGE.JAVASCRIPT;
+        case "":
+          return CODE_LANGUAGE.NONE;
+        default:
+          throw new Error("Unknown language: " + alias);
+      }
+    }
+  };
+  var CODE_LANGUAGE = /* @__PURE__ */ ((CODE_LANGUAGE2) => {
+    CODE_LANGUAGE2[CODE_LANGUAGE2["NONE"] = 0] = "NONE";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["PYTHON"] = 1] = "PYTHON";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["CPP"] = 2] = "CPP";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["JAVA"] = 3] = "JAVA";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["SQL"] = 4] = "SQL";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["PLSQL"] = 5] = "PLSQL";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["JAVASCRIPT"] = 6] = "JAVASCRIPT";
+    return CODE_LANGUAGE2;
+  })(CODE_LANGUAGE || {});
+
+  // src/parser/CodeParser.ts
+  function parseMultiLineCodeComment(line, nextLine, clozeNumber, codeStatus) {
+    codeStatus.nextLineIsCloze = true;
+    return {
+      result: line,
+      clozeNumber,
+      state: 4 /* MULTI_LINE_CODE */,
+      codeStatus
+    };
+  }
+  function parseMultiLineCode(line, nextLine, clozeNumber, codeStatus) {
+    if (line.startsWith("```")) {
+      codeStatus.nextLineIsCloze = false;
+      return {
+        result: line,
+        clozeNumber,
+        state: 0 /* TEXT */,
+        codeStatus: CODE_STATUS.notCode()
+      };
+    }
+    console.log({ line, isComment: isComment(line, codeStatus), empty: isEmpty(line) });
+    if (isComment(line, codeStatus)) {
+      return parseMultiLineCodeComment(line, nextLine, clozeNumber, codeStatus);
+    }
+    if (codeStatus.nextLineIsCloze && isEmpty(line)) {
+      codeStatus.nextLineIsCloze = false;
+      return {
+        result: line,
+        clozeNumber,
+        state: 4 /* MULTI_LINE_CODE */,
+        codeStatus
+      };
+    }
+    if (codeStatus.nextLineIsCloze && isEmpty(line)) {
+      codeStatus.nextLineIsCloze = false;
+      return {
+        result: line,
+        clozeNumber,
+        state: 4 /* MULTI_LINE_CODE */,
+        codeStatus
+      };
+    }
+    if (codeStatus.nextLineIsCloze) {
+      codeStatus.nextLineIsCloze = false;
+      const indent = /^\s*/.test(line) ? line.match(/^\s*/)[0] : "";
+      const lineWithoutIndent = line.trimStart();
+      console.log({ nextLine, isComment: isComment(nextLine, codeStatus), isEmpty: isEmpty(nextLine) });
+      if (isComment(nextLine, codeStatus) || isEmpty(nextLine)) {
+        codeStatus.nextLineIsCloze = false;
+        return {
+          result: `${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`,
+          clozeNumber: clozeNumber + 1,
+          state: 4 /* MULTI_LINE_CODE */,
+          codeStatus
+        };
+      } else {
+        codeStatus.nextLineIsCloze = true;
+        return {
+          result: `${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`,
+          clozeNumber,
+          state: 4 /* MULTI_LINE_CODE */,
+          codeStatus
+        };
+      }
+    }
+    return {
+      result: line,
+      clozeNumber,
+      state: 4 /* MULTI_LINE_CODE */,
+      codeStatus
+    };
+  }
+  function isComment(line, codeStatus) {
+    let isComment2 = false;
+    codeStatus.getCommentHeaders().forEach((header) => {
+      if (line.trimStart().startsWith(header)) {
+        isComment2 = true;
+      }
+    });
+    return isComment2;
+  }
+  function isEmpty(line) {
+    return line.trim().length === 0;
+  }
+
   // src/parser/TextParser.ts
   var ALLOWED_BULLETS = ["\\d*\\.", "-"];
   var ALLOWED_SEPARATORS = ["-", "="];
@@ -86,6 +175,14 @@
     }
     if (clozeNumber < 1) {
       throw new Error("Cloze number cannot be less than 1");
+    }
+    if (line.startsWith("```")) {
+      return {
+        result: line,
+        clozeNumber,
+        state: 4 /* MULTI_LINE_CODE */,
+        codeStatus: new CODE_STATUS(CODE_STATUS.getLanguageFromAlias(line.substring(3)))
+      };
     }
     const matchedGroups = line.match(BULLET_SEPARATOR_REGEX)?.groups ?? null;
     if (matchedGroups === null) {
@@ -149,28 +246,25 @@
   function parse(text) {
     let clozeNumber = 1;
     let currentState = 0 /* TEXT */;
+    let codeStatus = CODE_STATUS.notCode();
+    let nextLine;
     let resultLines = [];
     while (text.length > 0) {
-      const nextLine = text.slice(0, /$/m.exec(text).index).trim();
-      text = text.slice(/$/m.exec(text).index).trim();
+      ({ left: nextLine, right: text } = partition(text, "\n"));
       let parsedObject;
       if (currentState === 0 /* TEXT */) {
         parsedObject = parseText(nextLine, clozeNumber);
       } else if (currentState === 4 /* MULTI_LINE_CODE */) {
-        parsedObject = parseText(nextLine, clozeNumber);
+        parsedObject = parseMultiLineCode(nextLine, partition(nextLine, "\n").left, clozeNumber, codeStatus);
       } else if (currentState === 3 /* MULTI_LINE_LATEX */) {
         parsedObject = parseText(nextLine, clozeNumber);
       } else {
         throw new Error("Invalid State: " + currentState);
       }
       resultLines.push(parsedObject.result);
-      ({ clozeNumber, state: currentState } = parsedObject);
+      ({ clozeNumber, state: currentState, codeStatus } = parsedObject);
     }
     return resultLines.join("\n");
   }
   module.exports = parse;
-  console.log(parse(`- one = four`));
-  console.log(parse(`- one $$two - three$$ = four`));
-  console.log(parse(`- one $$two - three$$ asdf $$four - four$$ - five`));
-  console.log(parse(`- one $$two - three$$ asdf $$four - four$$ = five`));
 })();

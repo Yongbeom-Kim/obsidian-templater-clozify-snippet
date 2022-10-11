@@ -23,9 +23,9 @@ const BULLET_SEPARATOR_REGEX = new RegExp(
 
 // Separators within these blocks are ignored
 const BLOCK_IGNORE_SEPARATOR = [
-    {start: "$$", end: "$$"},
-    {start: "$", end: "$"},
-    {start: "\`", end: "\`"},
+    { start: "$$", end: "$$" },
+    { start: "$", end: "$" },
+    { start: "\`", end: "\`" },
 ];
 
 // console.log({ BULLET_SEPARATOR_REGEX })
@@ -51,7 +51,15 @@ export function parseText(line: string, clozeNumber: number): ParseOutput {
     if (clozeNumber < 1) {
         throw new Error("Cloze number cannot be less than 1")
     }
-    // console.log(line + "\n");
+
+    if (line.startsWith("```")) {
+        return {
+            result: line,
+            clozeNumber: clozeNumber,
+            state: STATE.MULTI_LINE_CODE,
+            codeStatus: new CODE_STATUS(CODE_STATUS.getLanguageFromAlias(line.substring(3)))
+        }
+    }
 
     const matchedGroups = line.match(BULLET_SEPARATOR_REGEX)?.groups ?? null;
 

@@ -1,5 +1,5 @@
 import {parseText as parseTextLine} from "../../src/parser/TextParser";
-import { STATE } from "../../src/parser/Parser";
+import { CODE_LANGUAGE, CODE_STATUS, STATE } from "../../src/parser/Parser";
 
 // Note that test cases erase whitespace cause whitespaces are not important.
 
@@ -90,4 +90,16 @@ describe("parse text: numbered bullet with equal delimiter", () => {
         expect(parseTextLine("125. one=two", 1).result.replace(/\s/g, "")).toEqual("125.one=two");
     })
 });
+
+describe("``` starts code block", () => {
+    it("javascript", () => {
+        expect(parseTextLine("```js", 1))
+        .toEqual({
+            result:"```js",
+            clozeNumber: 1,
+            state: STATE.MULTI_LINE_CODE,
+            codeStatus: new CODE_STATUS(CODE_LANGUAGE.JAVASCRIPT, false)
+        })
+    })   
+})
 

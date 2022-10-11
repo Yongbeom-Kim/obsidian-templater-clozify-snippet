@@ -19,7 +19,7 @@ export interface ParseOutput {
 
 export class CODE_STATUS {
     language: CODE_LANGUAGE;
-    prevLineIsComment: boolean;
+    nextLineIsCloze: boolean;
 
     public static notCode() {
         return new CODE_STATUS(CODE_LANGUAGE.NONE);
@@ -27,10 +27,10 @@ export class CODE_STATUS {
 
     public constructor(language: CODE_LANGUAGE, prevLineIsComment: boolean = false) {
         this.language = language;
-        this.prevLineIsComment = prevLineIsComment;
+        this.nextLineIsCloze = prevLineIsComment;
     }
 
-    getCommentHeaderRegex(): string[] {
+    getCommentHeaders(): string[] {
         switch (this.language) {
             case CODE_LANGUAGE.NONE:
             default:
@@ -38,11 +38,10 @@ export class CODE_STATUS {
             case CODE_LANGUAGE.PYTHON:
                 return ["#"]
             case CODE_LANGUAGE.CPP:
-                return ["//"]
             case CODE_LANGUAGE.JAVA:
+            case CODE_LANGUAGE.JAVASCRIPT:
                 return ["//"]
             case CODE_LANGUAGE.SQL:
-                return ["--"];
             case CODE_LANGUAGE.PLSQL:
                 return ["--"];
         }
@@ -60,8 +59,12 @@ export class CODE_STATUS {
                 return CODE_LANGUAGE.CPP;
             case 'java':
                 return CODE_LANGUAGE.JAVA;
-            default:
+            case 'js':
+                return CODE_LANGUAGE.JAVASCRIPT;
+            case '':
                 return CODE_LANGUAGE.NONE;
+            default:
+                throw new Error("Unknown language: " + alias);
         }
     }
 }
@@ -70,12 +73,14 @@ export class CODE_STATUS {
  * Enumeration representing programming languages
  * of a multi-line code block.
  */
-enum CODE_LANGUAGE {
+
+export enum CODE_LANGUAGE {
     NONE,
     PYTHON,
     CPP,
     JAVA,
     SQL,
-    PLSQL
+    PLSQL,
+    JAVASCRIPT
 }
 

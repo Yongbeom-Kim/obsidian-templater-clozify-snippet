@@ -1,5 +1,5 @@
 import { partition } from "./util/str_utils";
-import { parseMultiLineCode } from "parser/CodeParser";
+import { parseMultiLineCode } from "./parser/CodeParser";
 import { CODE_STATUS, STATE } from "./parser/Parser";
 import { parseText as parseTextLine } from "./parser/TextParser";
 
@@ -14,9 +14,6 @@ export default function parse(text: string): string {
         // Get next line
         // TODO: Null safety here
         ({ left: nextLine, right: text } = partition(text, "\n"));
-
-        // const nextLine: string = text.slice(0, (/$/m).exec(text)!.index).trim();
-        // text = text.slice((/$/m).exec(text)!.index).trim();
         
         let parsedObject;
         if (currentState === STATE.TEXT) {
@@ -30,7 +27,9 @@ export default function parse(text: string): string {
         } else {
             throw new Error("Invalid State: " + currentState);
         }
-
+        
+        // console.log({nextLine, textLeft:text});
+        // console.log(parsedObject);
         resultLines.push(parsedObject.result);
         ({clozeNumber, state: currentState, codeStatus} = parsedObject);
     }
@@ -40,7 +39,7 @@ export default function parse(text: string): string {
 
 module.exports = parse;
 
-console.log(parse(`- one = four`))
-console.log(parse(`- one $$two - three$$ = four`))
-console.log(parse(`- one $$two - three$$ asdf $$four - four$$ - five`))
-console.log(parse(`- one $$two - three$$ asdf $$four - four$$ = five`))
+// console.log(parse(`- one = four`))
+// console.log(parse(`- one $$two - three$$ = four`))
+// console.log(parse(`- one $$two - three$$ asdf $$four - four$$ - five`))
+// console.log(parse(`- one $$two - three$$ asdf $$four - four$$ = five`))
