@@ -1,6 +1,6 @@
 import { partition } from "./util/str_utils";
 import { parseMultiLineCode } from "./parser/CodeParser";
-import { CODE_STATUS, STATE } from "./parser/Parser";
+import { CODE_STATUS, ParseOutput, STATE } from "./parser/Parser";
 import { parseText as parseTextLine } from "./parser/TextParser";
 
 export default function parse(text: string): string {
@@ -15,12 +15,12 @@ export default function parse(text: string): string {
         // TODO: Null safety here
         ({ left: nextLine, right: text } = partition(text, "\n"));
         
-        let parsedObject;
+        let parsedObject: ParseOutput;
         if (currentState === STATE.TEXT) {
             parsedObject = parseTextLine(nextLine, clozeNumber);
         } else if (currentState === STATE.MULTI_LINE_CODE) {
             // TODO: parse multi line code
-            parsedObject = parseMultiLineCode(nextLine, partition(nextLine, "\n").left, clozeNumber, codeStatus);
+            parsedObject = parseMultiLineCode(nextLine, partition(text, "\n").left, clozeNumber, codeStatus);
         } else if (currentState === STATE.MULTI_LINE_LATEX) {
             // TODO: parse multi line latex
             parsedObject = parseTextLine(nextLine, clozeNumber);

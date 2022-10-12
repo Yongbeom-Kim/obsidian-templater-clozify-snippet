@@ -1,20 +1,5 @@
 import { CODE_STATUS, ParseOutput, STATE } from "./Parser";
 
-function parseMultiLineCodeComment(line: string,
-    nextLine: string,
-    clozeNumber: number,
-    codeStatus: CODE_STATUS
-): ParseOutput {
-    codeStatus.nextLineIsCloze = true;
-        
-    // console.log({codeStatus})
-    return {
-        result: line,
-        clozeNumber,
-        state: STATE.MULTI_LINE_CODE,
-        codeStatus
-    };
-}
 
 export function parseMultiLineCode(
     line: string,
@@ -24,79 +9,67 @@ export function parseMultiLineCode(
 ): ParseOutput {
 
     if (line.startsWith("```")) {
-        codeStatus.nextLineIsCloze = false;
-        return {
-            result: line,
-            clozeNumber,
-            state: STATE.TEXT,
-            codeStatus: CODE_STATUS.notCode()
-        };
+        return parseEndMultilineCode(line, nextLine, clozeNumber, codeStatus);
     }
-
-    console.log({line, isComment: isComment(line, codeStatus), empty: isEmpty(line)});
-    // Check if line is comment
     if (isComment(line, codeStatus)) {
-        return parseMultiLineCodeComment(line, nextLine, clozeNumber, codeStatus);
+        return parseCodeComment(line, nextLine, clozeNumber, codeStatus);
     }
-
-    // If prev line is comment and this is empty, just continue
-    if (codeStatus.nextLineIsCloze && isEmpty(line)) {
-        codeStatus.nextLineIsCloze = false;
-
-        return {
-            result: line,
-            clozeNumber,
-            state: STATE.MULTI_LINE_CODE,
-            codeStatus
-        };
+    if (isEmpty(line)) {
+        return parseEmptyLine(line, nextLine, clozeNumber, codeStatus);
     }
-
-    // If prev line is comment and this is empty, just continue
-    if (codeStatus.nextLineIsCloze && isEmpty(line)) {
-        codeStatus.nextLineIsCloze = false;
-
-        return {
-            result: line,
-            clozeNumber,
-            state: STATE.MULTI_LINE_CODE,
-            codeStatus
-        };
-    }
-
-    // If prev line is comment and this is not comment or not empty
-    // , then make this a cloze
     if (codeStatus.nextLineIsCloze) {
-        codeStatus.nextLineIsCloze = false;
-
-        // @ts-ignore note that line.match can't be null cause checked already
-        const indent = /^\s*/.test(line) ? line.match(/^\s*/)[0] : "";
-        const lineWithoutIndent = line.trimStart();
-
-        // If next line is a comment or empty, 
-        // then end increment cloze
-        console.log({nextLine, isComment: isComment(nextLine, codeStatus), isEmpty: isEmpty(nextLine)});
-        if ((isComment(nextLine, codeStatus) || isEmpty(nextLine))) {
-            codeStatus.nextLineIsCloze = false;
-            
-            return {
-                result: `${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`,
-                clozeNumber: clozeNumber + 1,
-                state: STATE.MULTI_LINE_CODE,
-                codeStatus
-            };
-        }
-
-        // If next line is an actual line, then make it anki
-        else {
-            codeStatus.nextLineIsCloze = true;
-            return {
-                result: `${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`,
-                clozeNumber: clozeNumber,
-                state: STATE.MULTI_LINE_CODE,
-                codeStatus
-            };
-        }
+        return parseClozifyCode(line, nextLine, clozeNumber, codeStatus);
     }
+
+    return parseNonClozifyCode(line, nextLine, clozeNumber, codeStatus);
+
+}
+
+/**
+ * Parse the end of a multi-line code block (```)
+ */
+function parseEndMultilineCode(
+    line: string,
+    nextLine: string,
+    clozeNumber: number,
+    codeStatus: CODE_STATUS
+) {
+    codeStatus.nextLineIsCloze = false;
+    return {
+        result: line,
+        clozeNumber,
+        state: STATE.TEXT,
+        codeStatus: CODE_STATUS.notCode()
+    };
+}
+/**
+ * Parse a code comment
+ */
+function parseCodeComment(line: string,
+    nextLine: string,
+    clozeNumber: number,
+    codeStatus: CODE_STATUS
+): ParseOutput {
+    codeStatus.nextLineIsCloze = true;
+
+    // console.log({codeStatus})
+    return {
+        result: line,
+        clozeNumber,
+        state: STATE.MULTI_LINE_CODE,
+        codeStatus
+    };
+}
+
+/**
+ *  Parse an empty line
+ */
+function parseEmptyLine(line: string,
+    nextLine: string,
+    clozeNumber: number,
+    codeStatus: CODE_STATUS
+): ParseOutput {
+    codeStatus.nextLineIsCloze = false;
 
     return {
         result: line,
@@ -104,8 +77,68 @@ export function parseMultiLineCode(
         state: STATE.MULTI_LINE_CODE,
         codeStatus
     };
-
 }
+
+/**
+ * Parse a line of code, when it is meant to be clozified.
+ */
+function parseClozifyCode(line: string,
+    nextLine: string,
+    clozeNumber: number,
+    codeStatus: CODE_STATUS
+): ParseOutput {
+    // @ts-ignore note that line.match can't be null cause checked already
+    const indent = /^\s*/.test(line) ? line.match(/^\s*/)[0] : "";
+    const lineWithoutIndent = line.trimStart();
+
+    // If next line is a comment or empty, 
+    // then end increment cloze
+    if ((isComment(nextLine, codeStatus) || isEmpty(nextLine))) {
+        codeStatus.nextLineIsCloze = false;
+
+        return {
+            result: `${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`,
+            clozeNumber: clozeNumber + 1,
+            state: STATE.MULTI_LINE_CODE,
+            codeStatus
+        };
+    }
+
+    // If next line is an actual line, then make it anki
+    else {
+        codeStatus.nextLineIsCloze = true;
+        return {
+            result: `${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`,
+            clozeNumber: clozeNumber,
+            state: STATE.MULTI_LINE_CODE,
+            codeStatus
+        };
+    }
+}
+
+/**
+ * Parse a line of code, when it is not clozified
+ */
+function parseNonClozifyCode(line: string,
+    nextLine: string,
+    clozeNumber: number,
+    codeStatus: CODE_STATUS
+): ParseOutput {
+    return {
+        result: line,
+        clozeNumber,
+        state: STATE.MULTI_LINE_CODE,
+        codeStatus
+    }
+}
+
+
+/*
+    UTILS
+*/
+
+
+
 
 function isComment(line: string, codeStatus: CODE_STATUS): boolean {
     let isComment = false;

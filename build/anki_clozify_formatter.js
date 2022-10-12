@@ -77,7 +77,31 @@
   })(CODE_LANGUAGE || {});
 
   // src/parser/CodeParser.ts
-  function parseMultiLineCodeComment(line, nextLine, clozeNumber, codeStatus) {
+  function parseMultiLineCode(line, nextLine, clozeNumber, codeStatus) {
+    if (line.startsWith("```")) {
+      return parseEndMultilineCode(line, nextLine, clozeNumber, codeStatus);
+    }
+    if (isComment(line, codeStatus)) {
+      return parseCodeComment(line, nextLine, clozeNumber, codeStatus);
+    }
+    if (isEmpty(line)) {
+      return parseEmptyLine(line, nextLine, clozeNumber, codeStatus);
+    }
+    if (codeStatus.nextLineIsCloze) {
+      return parseClozifyCode(line, nextLine, clozeNumber, codeStatus);
+    }
+    return parseNonClozifyCode(line, nextLine, clozeNumber, codeStatus);
+  }
+  function parseEndMultilineCode(line, nextLine, clozeNumber, codeStatus) {
+    codeStatus.nextLineIsCloze = false;
+    return {
+      result: line,
+      clozeNumber,
+      state: 0 /* TEXT */,
+      codeStatus: CODE_STATUS.notCode()
+    };
+  }
+  function parseCodeComment(line, nextLine, clozeNumber, codeStatus) {
     codeStatus.nextLineIsCloze = true;
     return {
       result: line,
@@ -86,61 +110,37 @@
       codeStatus
     };
   }
-  function parseMultiLineCode(line, nextLine, clozeNumber, codeStatus) {
-    if (line.startsWith("```")) {
+  function parseEmptyLine(line, nextLine, clozeNumber, codeStatus) {
+    codeStatus.nextLineIsCloze = false;
+    return {
+      result: line,
+      clozeNumber,
+      state: 4 /* MULTI_LINE_CODE */,
+      codeStatus
+    };
+  }
+  function parseClozifyCode(line, nextLine, clozeNumber, codeStatus) {
+    const indent = /^\s*/.test(line) ? line.match(/^\s*/)[0] : "";
+    const lineWithoutIndent = line.trimStart();
+    if (isComment(nextLine, codeStatus) || isEmpty(nextLine)) {
       codeStatus.nextLineIsCloze = false;
       return {
-        result: line,
-        clozeNumber,
-        state: 0 /* TEXT */,
-        codeStatus: CODE_STATUS.notCode()
+        result: `${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`,
+        clozeNumber: clozeNumber + 1,
+        state: 4 /* MULTI_LINE_CODE */,
+        codeStatus
       };
-    }
-    console.log({ line, isComment: isComment(line, codeStatus), empty: isEmpty(line) });
-    if (isComment(line, codeStatus)) {
-      return parseMultiLineCodeComment(line, nextLine, clozeNumber, codeStatus);
-    }
-    if (codeStatus.nextLineIsCloze && isEmpty(line)) {
-      codeStatus.nextLineIsCloze = false;
+    } else {
+      codeStatus.nextLineIsCloze = true;
       return {
-        result: line,
+        result: `${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`,
         clozeNumber,
         state: 4 /* MULTI_LINE_CODE */,
         codeStatus
       };
     }
-    if (codeStatus.nextLineIsCloze && isEmpty(line)) {
-      codeStatus.nextLineIsCloze = false;
-      return {
-        result: line,
-        clozeNumber,
-        state: 4 /* MULTI_LINE_CODE */,
-        codeStatus
-      };
-    }
-    if (codeStatus.nextLineIsCloze) {
-      codeStatus.nextLineIsCloze = false;
-      const indent = /^\s*/.test(line) ? line.match(/^\s*/)[0] : "";
-      const lineWithoutIndent = line.trimStart();
-      console.log({ nextLine, isComment: isComment(nextLine, codeStatus), isEmpty: isEmpty(nextLine) });
-      if (isComment(nextLine, codeStatus) || isEmpty(nextLine)) {
-        codeStatus.nextLineIsCloze = false;
-        return {
-          result: `${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`,
-          clozeNumber: clozeNumber + 1,
-          state: 4 /* MULTI_LINE_CODE */,
-          codeStatus
-        };
-      } else {
-        codeStatus.nextLineIsCloze = true;
-        return {
-          result: `${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`,
-          clozeNumber,
-          state: 4 /* MULTI_LINE_CODE */,
-          codeStatus
-        };
-      }
-    }
+  }
+  function parseNonClozifyCode(line, nextLine, clozeNumber, codeStatus) {
     return {
       result: line,
       clozeNumber,
@@ -255,7 +255,7 @@
       if (currentState === 0 /* TEXT */) {
         parsedObject = parseText(nextLine, clozeNumber);
       } else if (currentState === 4 /* MULTI_LINE_CODE */) {
-        parsedObject = parseMultiLineCode(nextLine, partition(nextLine, "\n").left, clozeNumber, codeStatus);
+        parsedObject = parseMultiLineCode(nextLine, partition(text, "\n").left, clozeNumber, codeStatus);
       } else if (currentState === 3 /* MULTI_LINE_LATEX */) {
         parsedObject = parseText(nextLine, clozeNumber);
       } else {
