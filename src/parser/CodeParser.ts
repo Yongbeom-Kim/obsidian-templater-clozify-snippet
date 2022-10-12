@@ -1,4 +1,4 @@
-import { addBackTicks } from "../util/str_utils";
+import { addBackTicks, makeCloze, processCodeCharacters } from "../util/str_utils";
 import { CODE_STATUS, ParseOutput, STATE } from "./Parser";
 
 
@@ -9,24 +9,22 @@ export function parseMultiLineCode(
     codeStatus: CODE_STATUS
 ): ParseOutput {
 
-    // Replace all tabs with double spaces
-    line = line.replaceAll("\t", "  ");
+    let returnObject;
 
     if (line.startsWith("```")) {
-        return endMultilineCode(line, nextLine, clozeNumber, codeStatus);
-    }
-    if (isComment(line, codeStatus)) {
-        return parseCodeComment(line, nextLine, clozeNumber, codeStatus);
-    }
-    if (isEmpty(line)) {
-        return parseEmptyLine(line, nextLine, clozeNumber, codeStatus);
-    }
-    if (codeStatus.nextLineIsCloze) {
-        return parseClozifyCode(line, nextLine, clozeNumber, codeStatus);
+        returnObject = endMultilineCode(line, nextLine, clozeNumber, codeStatus);
+    } else if (isComment(line, codeStatus)) {
+        returnObject = parseCodeComment(line, nextLine, clozeNumber, codeStatus);
+    } else if (isEmpty(line)) {
+        returnObject = parseEmptyLine(line, nextLine, clozeNumber, codeStatus);
+    } else if (codeStatus.nextLineIsCloze) {
+        returnObject = parseClozifyCode(line, nextLine, clozeNumber, codeStatus);
+    } else {
+        returnObject = parseNonClozifyCode(line, nextLine, clozeNumber, codeStatus);
     }
 
-    return parseNonClozifyCode(line, nextLine, clozeNumber, codeStatus);
-
+    returnObject.result = processCodeCharacters(returnObject.result);
+    return returnObject;
 }
 
 /**
@@ -91,33 +89,27 @@ function parseClozifyCode(line: string,
     clozeNumber: number,
     codeStatus: CODE_STATUS
 ): ParseOutput {
-    // @ts-ignore note that line.match can't be null cause checked already
-    const indent = /^\s*/.test(line) ? line.match(/^\s*/)[0] : "";
-    const lineWithoutIndent = line.trimStart();
+
+    const {indent, line: lineWithoutIndent} = partitionByIndent(line);
+    let nextClozeNumber = clozeNumber;
 
     // If next line is a comment or empty, 
     // then end increment cloze
     if ((isComment(nextLine, codeStatus) || isEmpty(nextLine))) {
         codeStatus.nextLineIsCloze = false;
-
-        return {
-            result: addBackTicks(`${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`),
-            clozeNumber: clozeNumber + 1,
-            state: STATE.MULTI_LINE_CODE,
-            codeStatus
-        };
+        nextClozeNumber ++;
     }
-
     // If next line is an actual line, then make it anki
     else {
         codeStatus.nextLineIsCloze = true;
-        return {
-            result: addBackTicks(`${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`),
-            clozeNumber: clozeNumber,
-            state: STATE.MULTI_LINE_CODE,
-            codeStatus
-        };
     }
+
+    return {
+        result: addBackTicks(processIndent(indent) + makeCloze(lineWithoutIndent, clozeNumber)),
+        clozeNumber: nextClozeNumber,
+        state: STATE.MULTI_LINE_CODE,
+        codeStatus
+    };
 }
 
 /**
@@ -141,6 +133,23 @@ function parseNonClozifyCode(line: string,
     UTILS
 */
 
+function processIndent(indent: string): string {
+    return indent.replaceAll(" ", " ‍")
+                .replaceAll("\t", " ‍ ‍")
+}
+/**
+ * Partition a line of code into indent and the part after indent.
+ * @param line line to parse
+ * @returns a {indent: string, line: string} object.
+ */
+function partitionByIndent(line: string): {indent: string, line: string} {
+    // Also, the ?? "" helps to eliminate the possibility of undefined in the ts compiler.
+    // @ts-ignore note that line.match can't be null cause checked already
+    const indent = (/^\s*/.test(line) ? line.match(/^\s*/)[0] : "") ?? "";
+    const lineWithoutIndent = line.trimStart();
+
+    return {indent: indent, line: lineWithoutIndent};
+}
 
 function isComment(line: string, codeStatus: CODE_STATUS): boolean {
     let isComment = false;

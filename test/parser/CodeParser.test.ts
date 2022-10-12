@@ -10,7 +10,7 @@ describe("make code anki", () => {
     it("no indent", () => {
         expect(parseMultiLineCode("abcd", "", 1, new CODE_STATUS(CODE_LANGUAGE.NONE, true)))
             .toEqual({
-                result: '`c1::{{ abcd }}`',
+                result: '`{{c1:: abcd }}`',
                 clozeNumber: 2,
                 state: 4,
                 codeStatus: new CODE_STATUS(CODE_LANGUAGE.NONE, false)
@@ -20,7 +20,7 @@ describe("make code anki", () => {
     it("indent", () => {
         expect(parseMultiLineCode("    abcd", "", 1, new CODE_STATUS(CODE_LANGUAGE.NONE, true)))
             .toEqual({
-                result: '`    c1::{{ abcd }}`',
+                result: '`    {{c1:: abcd }}`',
                 clozeNumber: 2,
                 state: 4,
                 codeStatus: new CODE_STATUS(CODE_LANGUAGE.NONE, false)

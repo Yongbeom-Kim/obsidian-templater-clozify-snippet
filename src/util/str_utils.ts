@@ -43,5 +43,28 @@ export function countDistinctSubstring(str: string, substring: string): number {
  * Adds backticks ` to the start and end of string
  */
 export function addBackTicks(str: string): string {
-    return `\`${str}\``;
+    if (str.length !== 0) {
+        return `\`${str}\``;
+    } else {
+        return str;
+    }
+}
+
+
+export function processCodeCharacters(str: string): string {
+    return str.replaceAll("$", "＄")
+}
+
+/**
+ * Make string cloze (i.e., do {{c<n>:: string }})
+ */
+export function makeCloze(str: string, clozeNumber: number): string {
+    return `{{c${clozeNumber}:: ${str} }}`;
+}
+
+/**
+ * Make string pre-cloze (i.e., do {{c<n>:::: string }})
+ */
+export function makePreCloze(str: string, clozeNumber: number): string {
+    return `{{c${clozeNumber}:::: ${str} }}`;
 }

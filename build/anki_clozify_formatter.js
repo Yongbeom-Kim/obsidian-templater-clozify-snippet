@@ -19,7 +19,20 @@
     return str.split(substring).length - 1;
   }
   function addBackTicks(str) {
-    return `\`${str}\``;
+    if (str.length !== 0) {
+      return `\`${str}\``;
+    } else {
+      return str;
+    }
+  }
+  function processCodeCharacters(str) {
+    return str.replaceAll("$", "\uFF04");
+  }
+  function makeCloze(str, clozeNumber) {
+    return `{{c${clozeNumber}:: ${str} }}`;
+  }
+  function makePreCloze(str, clozeNumber) {
+    return `{{c${clozeNumber}:::: ${str} }}`;
   }
 
   // src/parser/Parser.ts
@@ -81,20 +94,20 @@
 
   // src/parser/CodeParser.ts
   function parseMultiLineCode(line, nextLine, clozeNumber, codeStatus) {
-    line = line.replaceAll("	", "  ");
+    let returnObject;
     if (line.startsWith("```")) {
-      return endMultilineCode(line, nextLine, clozeNumber, codeStatus);
+      returnObject = endMultilineCode(line, nextLine, clozeNumber, codeStatus);
+    } else if (isComment(line, codeStatus)) {
+      returnObject = parseCodeComment(line, nextLine, clozeNumber, codeStatus);
+    } else if (isEmpty(line)) {
+      returnObject = parseEmptyLine(line, nextLine, clozeNumber, codeStatus);
+    } else if (codeStatus.nextLineIsCloze) {
+      returnObject = parseClozifyCode(line, nextLine, clozeNumber, codeStatus);
+    } else {
+      returnObject = parseNonClozifyCode(line, nextLine, clozeNumber, codeStatus);
     }
-    if (isComment(line, codeStatus)) {
-      return parseCodeComment(line, nextLine, clozeNumber, codeStatus);
-    }
-    if (isEmpty(line)) {
-      return parseEmptyLine(line, nextLine, clozeNumber, codeStatus);
-    }
-    if (codeStatus.nextLineIsCloze) {
-      return parseClozifyCode(line, nextLine, clozeNumber, codeStatus);
-    }
-    return parseNonClozifyCode(line, nextLine, clozeNumber, codeStatus);
+    returnObject.result = processCodeCharacters(returnObject.result);
+    return returnObject;
   }
   function endMultilineCode(line, nextLine, clozeNumber, codeStatus) {
     codeStatus.nextLineIsCloze = false;
@@ -124,25 +137,20 @@
     };
   }
   function parseClozifyCode(line, nextLine, clozeNumber, codeStatus) {
-    const indent = /^\s*/.test(line) ? line.match(/^\s*/)[0] : "";
-    const lineWithoutIndent = line.trimStart();
+    const { indent, line: lineWithoutIndent } = partitionByIndent(line);
+    let nextClozeNumber = clozeNumber;
     if (isComment(nextLine, codeStatus) || isEmpty(nextLine)) {
       codeStatus.nextLineIsCloze = false;
-      return {
-        result: addBackTicks(`${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`),
-        clozeNumber: clozeNumber + 1,
-        state: 4 /* MULTI_LINE_CODE */,
-        codeStatus
-      };
+      nextClozeNumber++;
     } else {
       codeStatus.nextLineIsCloze = true;
-      return {
-        result: addBackTicks(`${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`),
-        clozeNumber,
-        state: 4 /* MULTI_LINE_CODE */,
-        codeStatus
-      };
     }
+    return {
+      result: addBackTicks(processIndent(indent) + makeCloze(lineWithoutIndent, clozeNumber)),
+      clozeNumber: nextClozeNumber,
+      state: 4 /* MULTI_LINE_CODE */,
+      codeStatus
+    };
   }
   function parseNonClozifyCode(line, nextLine, clozeNumber, codeStatus) {
     return {
@@ -151,6 +159,14 @@
       state: 4 /* MULTI_LINE_CODE */,
       codeStatus
     };
+  }
+  function processIndent(indent) {
+    return indent.replaceAll(" ", " \u200D").replaceAll("	", " \u200D \u200D");
+  }
+  function partitionByIndent(line) {
+    const indent = (/^\s*/.test(line) ? line.match(/^\s*/)[0] : "") ?? "";
+    const lineWithoutIndent = line.trimStart();
+    return { indent, line: lineWithoutIndent };
   }
   function isComment(line, codeStatus) {
     let isComment2 = false;
@@ -211,7 +227,7 @@
       };
     }
     return {
-      result: `${bullet} c${clozeNumber}::::{{ ${front} }} ${separator} c${clozeNumber}::{{ ${back} }}`,
+      result: `${bullet} ${makePreCloze(front, clozeNumber)} ${separator} ${makeCloze(back, clozeNumber)}`,
       clozeNumber: clozeNumber + 1,
       state: 0 /* TEXT */,
       codeStatus: CODE_STATUS.notCode()

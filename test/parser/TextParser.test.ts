@@ -6,11 +6,11 @@ import { CODE_LANGUAGE, CODE_STATUS, STATE } from "../../src/parser/Parser";
 describe("parse text: bullet with dash delimiter", () => {
 
     test("no indent", () => {
-        expect(parseTextLine("- one - two", 1).result.replace(/\s/g, "")).toEqual("-c1::::{{one}}-c1::{{two}}");
+        expect(parseTextLine("- one - two", 1).result.replace(/\s/g, "")).toEqual("-{{c1::::one}}-{{c1::two}}");
     });
 
     test("indented", () => {
-        expect(parseTextLine("  - one - two", 1).result.replace(/\s/g, "")).toEqual("-c1::::{{one}}-c1::{{two}}");
+        expect(parseTextLine("  - one - two", 1).result.replace(/\s/g, "")).toEqual("-{{c1::::one}}-{{c1::two}}");
     });
 
     test("delimiter no space", () => {
@@ -24,14 +24,14 @@ describe("parse text: numbered bullet with dash delimiter", () => {
 
     test("no indent", () => {
 
-        expect(parseTextLine("1. one - two", 1).result.replace(/\s/g, "")).toEqual("1.c1::::{{one}}-c1::{{two}}");
-        expect(parseTextLine("125. one - two", 1).result.replace(/\s/g, "")).toEqual("125.c1::::{{one}}-c1::{{two}}");
+        expect(parseTextLine("1. one - two", 1).result.replace(/\s/g, "")).toEqual("1.{{c1::::one}}-{{c1::two}}");
+        expect(parseTextLine("125. one - two", 1).result.replace(/\s/g, "")).toEqual("125.{{c1::::one}}-{{c1::two}}");
     });
 
     test("indented", () => {
 
-        expect(parseTextLine("  1. one - two", 1).result.replace(/\s/g, "")).toEqual("1.c1::::{{one}}-c1::{{two}}");
-        expect(parseTextLine("  125. one - two", 1).result.replace(/\s/g, "")).toEqual("125.c1::::{{one}}-c1::{{two}}");
+        expect(parseTextLine("  1. one - two", 1).result.replace(/\s/g, "")).toEqual("1.{{c1::::one}}-{{c1::two}}");
+        expect(parseTextLine("  125. one - two", 1).result.replace(/\s/g, "")).toEqual("125.{{c1::::one}}-{{c1::two}}");
     });
 
     test("delimiter no space", () => {
@@ -50,11 +50,11 @@ describe("parse text: numbered bullet with dash delimiter", () => {
 describe("parse text: bullet with equal delimiter", () => {
 
     test("no indent", () => {
-        expect(parseTextLine("- one = two", 1).result.replace(/\s/g, "")).toEqual("-c1::::{{one}}=c1::{{two}}");
+        expect(parseTextLine("- one = two", 1).result.replace(/\s/g, "")).toEqual("-{{c1::::one}}={{c1::two}}");
     });
 
     test("indented", () => {
-        expect(parseTextLine("  - one = two", 1).result.replace(/\s/g, "")).toEqual("-c1::::{{one}}=c1::{{two}}");
+        expect(parseTextLine("  - one = two", 1).result.replace(/\s/g, "")).toEqual("-{{c1::::one}}={{c1::two}}");
     });
 
     test("delimiter no space", () => {
@@ -68,14 +68,14 @@ describe("parse text: numbered bullet with equal delimiter", () => {
 
     test("no indent", () => {
 
-        expect(parseTextLine("1. one = two", 1).result.replace(/\s/g, "")).toEqual("1.c1::::{{one}}=c1::{{two}}");
-        expect(parseTextLine("125. one = two", 1).result.replace(/\s/g, "")).toEqual("125.c1::::{{one}}=c1::{{two}}");
+        expect(parseTextLine("1. one = two", 1).result.replace(/\s/g, "")).toEqual("1.{{c1::::one}}={{c1::two}}");
+        expect(parseTextLine("125. one = two", 1).result.replace(/\s/g, "")).toEqual("125.{{c1::::one}}={{c1::two}}");
     });
 
     test("indented", () => {
 
-        expect(parseTextLine("  1. one = two", 1).result.replace(/\s/g, "")).toEqual("1.c1::::{{one}}=c1::{{two}}");
-        expect(parseTextLine("  125. one = two", 1).result.replace(/\s/g, "")).toEqual("125.c1::::{{one}}=c1::{{two}}");
+        expect(parseTextLine("  1. one = two", 1).result.replace(/\s/g, "")).toEqual("1.{{c1::::one}}={{c1::two}}");
+        expect(parseTextLine("  125. one = two", 1).result.replace(/\s/g, "")).toEqual("125.{{c1::::one}}={{c1::two}}");
     });
 
     test("delimiter no space", () => {

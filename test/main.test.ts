@@ -10,7 +10,7 @@ describe('parse code block', () => {
             "\`\`\`")).toBe(
                 "\n" +
                 "`// Import required library`" + "\n" +
-                "`c1::{{ const path = require('path'); }}`" + "\n"
+                "`{{c1:: const path = require('path'); }}`" + "\n"
             )
 
     })
@@ -34,7 +34,7 @@ describe('parse code block', () => {
             "\`\`\`")).toBe(
                 "" + "\n" +
                 "`// Import required library`" + "\n" +
-                "`c1::{{ const path = require('path'); }}`" + "\n" +
+                "`{{c1:: const path = require('path'); }}`" + "\n" +
                 "``" + "\n" +
                 "`const path = require('path');`" + "\n"
             )
@@ -76,24 +76,24 @@ describe('test notes', () => {
             "	" + "\n" +
             "};" + "\n" +
             "```")).toBe("### Basic Setup[^1]" + "\n" +
-                "- c1::::{{ To use webpack, npm packages are }} - c1::{{ `webpack and webpack-cli` }}" + "\n" +
-                "- c2::::{{ To run webpack, do }} - c2::{{ `npx webpack`. }}" + "\n" +
-                "- c3::::{{ The webpack configuration file is (+ directory?) }} - c3::{{ `webpack.config.js` in the base directory }}" + "\n" +
-                "- c4::::{{ If `webpack.config.js` is present, webpack automatically }} - c4::{{ picks it up to use as a config. }}" + "\n" +
+                "- {{c1:::: To use webpack, npm packages are }} - {{c1:: `webpack and webpack-cli` }}" + "\n" +
+                "- {{c2:::: To run webpack, do }} - {{c2:: `npx webpack`. }}" + "\n" +
+                "- {{c3:::: The webpack configuration file is (+ directory?) }} - {{c3:: `webpack.config.js` in the base directory }}" + "\n" +
+                "- {{c4:::: If `webpack.config.js` is present, webpack automatically }} - {{c4:: picks it up to use as a config. }}" + "\n" +
                 "- Basic `webpack.config.js` file:" + "\n" + 
                 "" + "\n" +
                 "`// Import required library`" + "\n" +
-                "`c5::{{ const path = require('path'); }}`" + "\n" +
+                "`{{c5:: const path = require('path'); }}`" + "\n" +
                 "``" + "\n" +
                 "`// First line of config`" + "\n" +
-                "`c6::{{ module.exports = { }}`" + "\n" +
+                "`{{c6:: module.exports = { }}`" + "\n" +
                 "`// Specify which file to compile`" + "\n" +
-                "`c7::{{ entry: './src/index.js', }}`" + "\n" +
+                "`{{c7:: entry: './src/index.js', }}`" + "\n" +
                 "`// Specify which file to spit out`" + "\n" +
-                "`c8::{{ output: { }}`" + "\n" +
-                "`c8::{{ filename: 'main.js', }}`" + "\n" +
-                "`c8::{{ path: path.resolve(__dirname, 'dist'), }}`" + "\n" +
-                "`c8::{{ }, }}`" + "\n" +
+                "`{{c8:: output: { }}`" + "\n" +
+                "`{{c8:: filename: 'main.js', }}`" + "\n" +
+                "`{{c8:: path: path.resolve(__dirname, 'dist'), }}`" + "\n" +
+                "`{{c8:: }, }}`" + "\n" +
                 "`  `" + "\n" +
                 "`};`" + "\n"
             );

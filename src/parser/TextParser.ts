@@ -2,7 +2,7 @@
  * An enum representing the state of text of the current character
  */
 
-import { countDistinctSubstring, lastPartition, partition } from "../util/str_utils";
+import { countDistinctSubstring, lastPartition, makeCloze, makePreCloze, partition } from "../util/str_utils";
 import { CODE_STATUS, ParseOutput, STATE } from "./Parser";
 
 
@@ -87,7 +87,7 @@ export function parseText(line: string, clozeNumber: number): ParseOutput {
         }
     }
     return {
-        result: `${bullet} c${clozeNumber}::::\{\{ ${front} \}\} ${separator} c${clozeNumber}::\{\{ ${back} \}\}`,
+        result: `${bullet} ${makePreCloze(front, clozeNumber)} ${separator} ${makeCloze(back, clozeNumber)}`,
         clozeNumber: clozeNumber + 1,
         state: STATE.TEXT,
         codeStatus: CODE_STATUS.notCode()
