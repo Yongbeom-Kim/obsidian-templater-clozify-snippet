@@ -18,6 +18,9 @@
   function countDistinctSubstring(str, substring) {
     return str.split(substring).length - 1;
   }
+  function addBackTicks(str) {
+    return `\`${str}\``;
+  }
 
   // src/parser/Parser.ts
   var CODE_STATUS = class {
@@ -79,7 +82,7 @@
   // src/parser/CodeParser.ts
   function parseMultiLineCode(line, nextLine, clozeNumber, codeStatus) {
     if (line.startsWith("```")) {
-      return parseEndMultilineCode(line, nextLine, clozeNumber, codeStatus);
+      return endMultilineCode(line, nextLine, clozeNumber, codeStatus);
     }
     if (isComment(line, codeStatus)) {
       return parseCodeComment(line, nextLine, clozeNumber, codeStatus);
@@ -92,10 +95,10 @@
     }
     return parseNonClozifyCode(line, nextLine, clozeNumber, codeStatus);
   }
-  function parseEndMultilineCode(line, nextLine, clozeNumber, codeStatus) {
+  function endMultilineCode(line, nextLine, clozeNumber, codeStatus) {
     codeStatus.nextLineIsCloze = false;
     return {
-      result: line,
+      result: "",
       clozeNumber,
       state: 0 /* TEXT */,
       codeStatus: CODE_STATUS.notCode()
@@ -104,7 +107,7 @@
   function parseCodeComment(line, nextLine, clozeNumber, codeStatus) {
     codeStatus.nextLineIsCloze = true;
     return {
-      result: line,
+      result: addBackTicks(line),
       clozeNumber,
       state: 4 /* MULTI_LINE_CODE */,
       codeStatus
@@ -113,7 +116,7 @@
   function parseEmptyLine(line, nextLine, clozeNumber, codeStatus) {
     codeStatus.nextLineIsCloze = false;
     return {
-      result: line,
+      result: addBackTicks(line),
       clozeNumber,
       state: 4 /* MULTI_LINE_CODE */,
       codeStatus
@@ -125,7 +128,7 @@
     if (isComment(nextLine, codeStatus) || isEmpty(nextLine)) {
       codeStatus.nextLineIsCloze = false;
       return {
-        result: `${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`,
+        result: addBackTicks(`${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`),
         clozeNumber: clozeNumber + 1,
         state: 4 /* MULTI_LINE_CODE */,
         codeStatus
@@ -133,7 +136,7 @@
     } else {
       codeStatus.nextLineIsCloze = true;
       return {
-        result: `${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`,
+        result: addBackTicks(`${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`),
         clozeNumber,
         state: 4 /* MULTI_LINE_CODE */,
         codeStatus
@@ -142,7 +145,7 @@
   }
   function parseNonClozifyCode(line, nextLine, clozeNumber, codeStatus) {
     return {
-      result: line,
+      result: addBackTicks(line),
       clozeNumber,
       state: 4 /* MULTI_LINE_CODE */,
       codeStatus
@@ -177,12 +180,7 @@
       throw new Error("Cloze number cannot be less than 1");
     }
     if (line.startsWith("```")) {
-      return {
-        result: line,
-        clozeNumber,
-        state: 4 /* MULTI_LINE_CODE */,
-        codeStatus: new CODE_STATUS(CODE_STATUS.getLanguageFromAlias(line.substring(3)))
-      };
+      return startCodeBlock(line, clozeNumber);
     }
     const matchedGroups = line.match(BULLET_SEPARATOR_REGEX)?.groups ?? null;
     if (matchedGroups === null) {
@@ -216,6 +214,14 @@
       clozeNumber: clozeNumber + 1,
       state: 0 /* TEXT */,
       codeStatus: CODE_STATUS.notCode()
+    };
+  }
+  function startCodeBlock(line, clozeNumber) {
+    return {
+      result: "",
+      clozeNumber,
+      state: 4 /* MULTI_LINE_CODE */,
+      codeStatus: new CODE_STATUS(CODE_STATUS.getLanguageFromAlias(line.substring(3)))
     };
   }
   function shiftSeparatorToNextDelimiter(front, current_separator, back, delimiter, possible_separators) {

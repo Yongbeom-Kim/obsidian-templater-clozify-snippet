@@ -4,11 +4,11 @@
  * @param delimiter
  * @returns {left: string, right: string} object, right string is empty if no delimiter found
  */
-export function partition(str: string, delimiter: string): {left: string, right: string} {
+export function partition(str: string, delimiter: string): { left: string, right: string } {
     const splitString: string[] = str.split(delimiter);
 
     return {
-        left: splitString[0] ?? "", 
+        left: splitString[0] ?? "",
         right: splitString?.slice(1)?.join(delimiter) ?? ""
     };
 }
@@ -19,7 +19,7 @@ export function partition(str: string, delimiter: string): {left: string, right:
  * @param delimiter
  * @returns {left: string, right: string} object, left string is empty if no delimiter found
  */
-export function lastPartition(str: string, delimiter: string): {left: string, right: string} {
+export function lastPartition(str: string, delimiter: string): { left: string, right: string } {
     const splitString = str.split(delimiter);
 
     return {
@@ -37,4 +37,11 @@ export function lastPartition(str: string, delimiter: string): {left: string, ri
  */
 export function countDistinctSubstring(str: string, substring: string): number {
     return str.split(substring).length - 1
+}
+
+/**
+ * Adds backticks ` to the start and end of string
+ */
+export function addBackTicks(str: string): string {
+    return `\`${str}\``;
 }

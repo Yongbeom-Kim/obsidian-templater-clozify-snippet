@@ -95,7 +95,7 @@ describe("``` starts code block", () => {
     it("javascript", () => {
         expect(parseTextLine("```js", 1))
         .toEqual({
-            result:"```js",
+            result:"",
             clozeNumber: 1,
             state: STATE.MULTI_LINE_CODE,
             codeStatus: new CODE_STATUS(CODE_LANGUAGE.JAVASCRIPT, false)

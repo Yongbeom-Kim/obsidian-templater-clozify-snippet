@@ -1,3 +1,4 @@
+import { addBackTicks } from "../util/str_utils";
 import { CODE_STATUS, ParseOutput, STATE } from "./Parser";
 
 
@@ -9,7 +10,7 @@ export function parseMultiLineCode(
 ): ParseOutput {
 
     if (line.startsWith("```")) {
-        return parseEndMultilineCode(line, nextLine, clozeNumber, codeStatus);
+        return endMultilineCode(line, nextLine, clozeNumber, codeStatus);
     }
     if (isComment(line, codeStatus)) {
         return parseCodeComment(line, nextLine, clozeNumber, codeStatus);
@@ -28,7 +29,7 @@ export function parseMultiLineCode(
 /**
  * Parse the end of a multi-line code block (```)
  */
-function parseEndMultilineCode(
+function endMultilineCode(
     line: string,
     nextLine: string,
     clozeNumber: number,
@@ -36,7 +37,7 @@ function parseEndMultilineCode(
 ) {
     codeStatus.nextLineIsCloze = false;
     return {
-        result: line,
+        result: "",
         clozeNumber,
         state: STATE.TEXT,
         codeStatus: CODE_STATUS.notCode()
@@ -54,7 +55,7 @@ function parseCodeComment(line: string,
 
     // console.log({codeStatus})
     return {
-        result: line,
+        result: addBackTicks(line),
         clozeNumber,
         state: STATE.MULTI_LINE_CODE,
         codeStatus
@@ -72,7 +73,7 @@ function parseEmptyLine(line: string,
     codeStatus.nextLineIsCloze = false;
 
     return {
-        result: line,
+        result: addBackTicks(line),
         clozeNumber,
         state: STATE.MULTI_LINE_CODE,
         codeStatus
@@ -97,7 +98,7 @@ function parseClozifyCode(line: string,
         codeStatus.nextLineIsCloze = false;
 
         return {
-            result: `${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`,
+            result: addBackTicks(`${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`),
             clozeNumber: clozeNumber + 1,
             state: STATE.MULTI_LINE_CODE,
             codeStatus
@@ -108,7 +109,7 @@ function parseClozifyCode(line: string,
     else {
         codeStatus.nextLineIsCloze = true;
         return {
-            result: `${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`,
+            result: addBackTicks(`${indent}c${clozeNumber}::{{ ${lineWithoutIndent} }}`),
             clozeNumber: clozeNumber,
             state: STATE.MULTI_LINE_CODE,
             codeStatus
@@ -125,7 +126,7 @@ function parseNonClozifyCode(line: string,
     codeStatus: CODE_STATUS
 ): ParseOutput {
     return {
-        result: line,
+        result: addBackTicks(line),
         clozeNumber,
         state: STATE.MULTI_LINE_CODE,
         codeStatus
@@ -136,8 +137,6 @@ function parseNonClozifyCode(line: string,
 /*
     UTILS
 */
-
-
 
 
 function isComment(line: string, codeStatus: CODE_STATUS): boolean {

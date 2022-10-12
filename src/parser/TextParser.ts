@@ -28,7 +28,7 @@ const BLOCK_IGNORE_SEPARATOR = [
     { start: "\`", end: "\`" },
 ];
 
-// console.log({ BULLET_SEPARATOR_REGEX })
+
 /**
  * When given a line of plain text to parse (not code or LaTeX), parses line into appropriate anki cloze format.
  * 
@@ -53,12 +53,7 @@ export function parseText(line: string, clozeNumber: number): ParseOutput {
     }
 
     if (line.startsWith("```")) {
-        return {
-            result: line,
-            clozeNumber: clozeNumber,
-            state: STATE.MULTI_LINE_CODE,
-            codeStatus: new CODE_STATUS(CODE_STATUS.getLanguageFromAlias(line.substring(3)))
-        }
+        return startCodeBlock(line, clozeNumber);
     }
 
     const matchedGroups = line.match(BULLET_SEPARATOR_REGEX)?.groups ?? null;
@@ -99,6 +94,19 @@ export function parseText(line: string, clozeNumber: number): ParseOutput {
     };
 }
 
+function startCodeBlock(line: string, clozeNumber: number): ParseOutput {
+    return {
+        result: "",
+        clozeNumber: clozeNumber,
+        state: STATE.MULTI_LINE_CODE,
+        codeStatus: new CODE_STATUS(CODE_STATUS.getLanguageFromAlias(line.substring(3)))
+    }
+}
+
+
+/*
+UTILS
+*/
 function shiftSeparatorToNextDelimiter(
     front: string,
     current_separator: string,
