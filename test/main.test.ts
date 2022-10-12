@@ -1,4 +1,4 @@
-import parse from "../src/anki_clozify_formatter";
+import parse from "../src/main";
 
 
 describe('parse code block', () => {

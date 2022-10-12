@@ -265,7 +265,7 @@
     };
   }
 
-  // src/anki_clozify_formatter.ts
+  // src/main.ts
   function parse(text) {
     let clozeNumber = 1;
     let currentState = 0 /* TEXT */;

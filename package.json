@@ -4,7 +4,7 @@
   "description": "",
   "main": "anki_clozify_formatter.js",
   "scripts": {
-    "build": "esbuild src/anki_clozify_formatter.ts --bundle --outfile=\"build/anki_clozify_formatter.js\" --watch",
+    "build": "esbuild src/main.ts --bundle --outfile=\"build/anki_clozify_formatter.js\" --watch",
     "test": "jest"
   },
   "jest": {
