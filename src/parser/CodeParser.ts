@@ -54,9 +54,8 @@ function parseCodeComment(line: string,
 ): ParseOutput {
     codeStatus.nextLineIsCloze = true;
 
-    // console.log({codeStatus})
     return {
-        result: addBackTicks(line),
+        result: addBackTicks(processIndent(partitionByIndent(line).indent) + partitionByIndent(line).line),
         clozeNumber,
         state: STATE.MULTI_LINE_CODE,
         codeStatus

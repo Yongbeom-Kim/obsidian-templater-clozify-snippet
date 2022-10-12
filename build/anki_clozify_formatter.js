@@ -121,7 +121,7 @@
   function parseCodeComment(line, nextLine, clozeNumber, codeStatus) {
     codeStatus.nextLineIsCloze = true;
     return {
-      result: addBackTicks(line),
+      result: addBackTicks(processIndent(partitionByIndent(line).indent) + partitionByIndent(line).line),
       clozeNumber,
       state: 4 /* MULTI_LINE_CODE */,
       codeStatus
