@@ -1,1 +1,1 @@
-# obsidian-templater-clozify-snippet
+# Obsidian Clozify Snippet (Templater)
