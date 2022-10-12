@@ -81,6 +81,7 @@
 
   // src/parser/CodeParser.ts
   function parseMultiLineCode(line, nextLine, clozeNumber, codeStatus) {
+    line = line.replaceAll("	", "  ");
     if (line.startsWith("```")) {
       return endMultilineCode(line, nextLine, clozeNumber, codeStatus);
     }

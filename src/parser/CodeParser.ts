@@ -9,6 +9,9 @@ export function parseMultiLineCode(
     codeStatus: CODE_STATUS
 ): ParseOutput {
 
+    // Replace all tabs with double spaces
+    line = line.replaceAll("\t", "  ");
+
     if (line.startsWith("```")) {
         return endMultilineCode(line, nextLine, clozeNumber, codeStatus);
     }

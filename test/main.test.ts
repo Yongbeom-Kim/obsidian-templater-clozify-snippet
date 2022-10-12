@@ -94,7 +94,7 @@ describe('test notes', () => {
                 "`c8::{{ filename: 'main.js', }}`" + "\n" +
                 "`c8::{{ path: path.resolve(__dirname, 'dist'), }}`" + "\n" +
                 "`c8::{{ }, }}`" + "\n" +
-                "`	`" + "\n" +
+                "`  `" + "\n" +
                 "`};`" + "\n"
             );
     })
