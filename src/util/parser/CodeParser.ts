@@ -1,4 +1,4 @@
-import { addBackTicks, makeCloze, processCodeCharacters } from "../util/str_utils";
+import { addBackTicks, makeCloze, processCodeCharacters } from "../str_utils";
 import { CODE_STATUS, ParseOutput, STATE } from "./Parser";
 
 

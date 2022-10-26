@@ -35,7 +35,7 @@
     return `{{c${clozeNumber}:::: ${str} }}`;
   }
 
-  // src/parser/Parser.ts
+  // src/util/parser/Parser.ts
   var CODE_STATUS = class {
     static notCode() {
       return new CODE_STATUS(CODE_LANGUAGE.NONE);
@@ -58,10 +58,12 @@
         case CODE_LANGUAGE.SQL:
         case CODE_LANGUAGE.PLSQL:
           return ["--"];
+        case CODE_LANGUAGE.SHELL:
+          return ["#"];
       }
     }
     static getLanguageFromAlias(alias) {
-      switch (alias) {
+      switch (alias.toLowerCase()) {
         case "sql":
           return CODE_LANGUAGE.SQL;
         case "plsql":
@@ -73,9 +75,13 @@
         case "java":
           return CODE_LANGUAGE.JAVA;
         case "js":
+        case "jsx":
           return CODE_LANGUAGE.JAVASCRIPT;
         case "":
           return CODE_LANGUAGE.NONE;
+        case "shell":
+        case "sh":
+          return CODE_LANGUAGE.SHELL;
         default:
           throw new Error("Unknown language: " + alias);
       }
@@ -89,10 +95,11 @@
     CODE_LANGUAGE2[CODE_LANGUAGE2["SQL"] = 4] = "SQL";
     CODE_LANGUAGE2[CODE_LANGUAGE2["PLSQL"] = 5] = "PLSQL";
     CODE_LANGUAGE2[CODE_LANGUAGE2["JAVASCRIPT"] = 6] = "JAVASCRIPT";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["SHELL"] = 7] = "SHELL";
     return CODE_LANGUAGE2;
   })(CODE_LANGUAGE || {});
 
-  // src/parser/CodeParser.ts
+  // src/util/parser/CodeParser.ts
   function parseMultiLineCode(line, nextLine, clozeNumber, codeStatus) {
     let returnObject;
     if (line.startsWith("```")) {
@@ -181,7 +188,7 @@
     return line.trim().length === 0;
   }
 
-  // src/parser/TextParser.ts
+  // src/util/parser/TextParser.ts
   var ALLOWED_BULLETS = ["\\d*\\.", "-"];
   var ALLOWED_SEPARATORS = ["-", "="];
   var PARSED_BULLET_REGEX = ALLOWED_BULLETS.join("|");

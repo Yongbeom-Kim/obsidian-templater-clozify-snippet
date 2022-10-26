@@ -44,11 +44,13 @@ export class CODE_STATUS {
             case CODE_LANGUAGE.SQL:
             case CODE_LANGUAGE.PLSQL:
                 return ["--"];
+            case CODE_LANGUAGE.SHELL:
+                return ["#"];
         }
     }
 
     static getLanguageFromAlias(alias: string): CODE_LANGUAGE {
-        switch (alias) {
+        switch (alias.toLowerCase()) {
             case 'sql':
                 return CODE_LANGUAGE.SQL;
             case 'plsql':
@@ -60,9 +62,13 @@ export class CODE_STATUS {
             case 'java':
                 return CODE_LANGUAGE.JAVA;
             case 'js':
+            case 'jsx':
                 return CODE_LANGUAGE.JAVASCRIPT;
             case '':
                 return CODE_LANGUAGE.NONE;
+            case 'shell':
+            case 'sh':
+                return CODE_LANGUAGE.SHELL;
             default:
                 throw new Error("Unknown language: " + alias);
         }
@@ -81,6 +87,7 @@ export enum CODE_LANGUAGE {
     JAVA,
     SQL,
     PLSQL,
-    JAVASCRIPT
+    JAVASCRIPT,
+    SHELL
 }
 

@@ -2,7 +2,7 @@
  * An enum representing the state of text of the current character
  */
 
-import { countDistinctSubstring, lastPartition, makeCloze, makePreCloze, partition } from "../util/str_utils";
+import { countDistinctSubstring, lastPartition, makeCloze, makePreCloze, partition } from "../str_utils";
 import { CODE_STATUS, ParseOutput, STATE } from "./Parser";
 
 
