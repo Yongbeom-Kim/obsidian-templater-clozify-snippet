@@ -40,9 +40,10 @@ const BLOCK_IGNORE_SEPARATOR = [
 * 
  * @param line line to parse
  * @param clozeNumber current Cloze number
+ * @param preCloze boolean of whether to do {{C1::::prompt }} at the start
  * @returns 
  */
-export function parseText(line: string, clozeNumber: number): ParseOutput {
+export function parseText(line: string, clozeNumber: number, preCloze: boolean = true): ParseOutput {
     // Line cannot contain newline
     if (/\n/.test(line)) {
         throw new Error("Line cannot contain \\n. Line is " + line)
@@ -86,8 +87,9 @@ export function parseText(line: string, clozeNumber: number): ParseOutput {
             codeStatus: CODE_STATUS.notCode()
         }
     }
+
     return {
-        result: `${bullet} ${makePreCloze(front, clozeNumber)} ${separator} ${makeCloze(back, clozeNumber)}`,
+        result: `${bullet} ${preCloze ? makePreCloze(front, clozeNumber) : front} ${separator} ${makeCloze(back, clozeNumber)}`,
         clozeNumber: clozeNumber + 1,
         state: STATE.TEXT,
         codeStatus: CODE_STATUS.notCode()

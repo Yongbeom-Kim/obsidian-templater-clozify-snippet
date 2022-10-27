@@ -196,7 +196,7 @@
   var BULLET_SEPARATOR_REGEX = new RegExp(
     "(?<=^\\s*)(?<bullet>" + PARSED_BULLET_REGEX + ")\\s+(?<front>(?:(?!( = | - )).)*)\\s+(?<separator>" + PARSED_SEPARATOR_REGEX + ")\\s+(?<back>.*)"
   );
-  function parseText(line, clozeNumber) {
+  function parseText(line, clozeNumber, preCloze = true) {
     if (/\n/.test(line)) {
       throw new Error("Line cannot contain \\n. Line is " + line);
     }
@@ -234,7 +234,7 @@
       };
     }
     return {
-      result: `${bullet} ${makePreCloze(front, clozeNumber)} ${separator} ${makeCloze(back, clozeNumber)}`,
+      result: `${bullet} ${preCloze ? makePreCloze(front, clozeNumber) : front} ${separator} ${makeCloze(back, clozeNumber)}`,
       clozeNumber: clozeNumber + 1,
       state: 0 /* TEXT */,
       codeStatus: CODE_STATUS.notCode()
@@ -272,7 +272,7 @@
     };
   }
 
-  // src/main.ts
+  // src/main_no_precloze.ts
   function parse(text) {
     let clozeNumber = 1;
     let currentState = 0 /* TEXT */;
@@ -283,11 +283,11 @@
       ({ left: nextLine, right: text } = partition(text, "\n"));
       let parsedObject;
       if (currentState === 0 /* TEXT */) {
-        parsedObject = parseText(nextLine, clozeNumber);
+        parsedObject = parseText(nextLine, clozeNumber, false);
       } else if (currentState === 4 /* MULTI_LINE_CODE */) {
         parsedObject = parseMultiLineCode(nextLine, partition(text, "\n").left, clozeNumber, codeStatus);
       } else if (currentState === 3 /* MULTI_LINE_LATEX */) {
-        parsedObject = parseText(nextLine, clozeNumber);
+        parsedObject = parseText(nextLine, clozeNumber, false);
       } else {
         throw new Error("Invalid State: " + currentState);
       }
