@@ -35,7 +35,7 @@
     return `{{c${clozeNumber}:::: ${str} }}`;
   }
 
-  // src/util/parser/Parser.ts
+  // src/parser/Parser.ts
   var CODE_STATUS = class {
     static notCode() {
       return new CODE_STATUS(CODE_LANGUAGE.NONE);
@@ -99,10 +99,10 @@
     return CODE_LANGUAGE2;
   })(CODE_LANGUAGE || {});
 
-  // src/util/parser/CodeParser.ts
+  // src/parser/CodeParser.ts
   function parseMultiLineCode(line, nextLine, clozeNumber, codeStatus) {
     let returnObject;
-    if (line.startsWith("```")) {
+    if (isTripleBacktick(line)) {
       returnObject = endMultilineCode(line, nextLine, clozeNumber, codeStatus);
     } else if (isComment(line, codeStatus)) {
       returnObject = parseCodeComment(line, nextLine, clozeNumber, codeStatus);
@@ -146,7 +146,7 @@
   function parseClozifyCode(line, nextLine, clozeNumber, codeStatus) {
     const { indent, line: lineWithoutIndent } = partitionByIndent(line);
     let nextClozeNumber = clozeNumber;
-    if (isComment(nextLine, codeStatus) || isEmpty(nextLine)) {
+    if (isComment(nextLine, codeStatus) || isEmpty(nextLine) || isTripleBacktick(nextLine)) {
       codeStatus.nextLineIsCloze = false;
       nextClozeNumber++;
     } else {
@@ -187,8 +187,11 @@
   function isEmpty(line) {
     return line.trim().length === 0;
   }
+  function isTripleBacktick(line) {
+    return line.startsWith("```");
+  }
 
-  // src/util/parser/TextParser.ts
+  // src/parser/TextParser.ts
   var ALLOWED_BULLETS = ["\\d*\\.", "-"];
   var ALLOWED_SEPARATORS = ["-", "="];
   var PARSED_BULLET_REGEX = ALLOWED_BULLETS.join("|");
@@ -273,7 +276,7 @@
   }
 
   // src/main.ts
-  function parse(text) {
+  function parse(text, preCloze) {
     let clozeNumber = 1;
     let currentState = 0 /* TEXT */;
     let codeStatus = CODE_STATUS.notCode();
@@ -283,11 +286,11 @@
       ({ left: nextLine, right: text } = partition(text, "\n"));
       let parsedObject;
       if (currentState === 0 /* TEXT */) {
-        parsedObject = parseText(nextLine, clozeNumber);
+        parsedObject = parseText(nextLine, clozeNumber, preCloze);
       } else if (currentState === 4 /* MULTI_LINE_CODE */) {
         parsedObject = parseMultiLineCode(nextLine, partition(text, "\n").left, clozeNumber, codeStatus);
       } else if (currentState === 3 /* MULTI_LINE_LATEX */) {
-        parsedObject = parseText(nextLine, clozeNumber);
+        parsedObject = parseText(nextLine, clozeNumber, preCloze);
       } else {
         throw new Error("Invalid State: " + currentState);
       }
@@ -296,5 +299,7 @@
     }
     return resultLines.join("\n");
   }
-  module.exports = parse;
+  var parseWithoutPreCloze = (text) => parse(text, false);
+  var parseWithPreCloze = (text) => parse(text, true);
+  module.exports = parseWithPreCloze;
 })();

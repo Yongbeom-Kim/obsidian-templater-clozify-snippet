@@ -11,7 +11,7 @@ export function parseMultiLineCode(
 
     let returnObject;
 
-    if (line.startsWith("```")) {
+    if (isTripleBacktick(line)) {
         returnObject = endMultilineCode(line, nextLine, clozeNumber, codeStatus);
     } else if (isComment(line, codeStatus)) {
         returnObject = parseCodeComment(line, nextLine, clozeNumber, codeStatus);
@@ -38,10 +38,6 @@ function endMultilineCode(
 ) {
     codeStatus.nextLineIsCloze = false;
 
-    // Increment cloze number by 1 if next line is cloze
-    if (codeStatus.nextLineIsCloze) {
-        clozeNumber += 1;
-    }
     return {
         result: "",
         clozeNumber,
@@ -99,7 +95,7 @@ function parseClozifyCode(line: string,
 
     // If next line is a comment or empty, 
     // then end increment cloze
-    if ((isComment(nextLine, codeStatus) || isEmpty(nextLine))) {
+    if ((isComment(nextLine, codeStatus) || isEmpty(nextLine) || isTripleBacktick(nextLine))) {
         codeStatus.nextLineIsCloze = false;
         nextClozeNumber ++;
     }
@@ -168,4 +164,8 @@ function isComment(line: string, codeStatus: CODE_STATUS): boolean {
 
 function isEmpty(line: string): boolean {
     return line.trim().length === 0;
+}
+
+function isTripleBacktick(line: string): boolean {
+    return line.startsWith("```");   
 }

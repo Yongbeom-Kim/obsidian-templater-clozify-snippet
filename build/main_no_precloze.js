@@ -1,5 +1,13 @@
 "use strict";
 (() => {
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __esm = (fn, res) => function __init() {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  };
+  var __commonJS = (cb, mod) => function __require() {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  };
+
   // src/util/str_utils.ts
   function partition(str, delimiter) {
     const splitString = str.split(delimiter);
@@ -34,75 +42,86 @@
   function makePreCloze(str, clozeNumber) {
     return `{{c${clozeNumber}:::: ${str} }}`;
   }
+  var init_str_utils = __esm({
+    "src/util/str_utils.ts"() {
+      "use strict";
+    }
+  });
 
-  // src/util/parser/Parser.ts
-  var CODE_STATUS = class {
-    static notCode() {
-      return new CODE_STATUS(CODE_LANGUAGE.NONE);
+  // src/parser/Parser.ts
+  var CODE_STATUS, CODE_LANGUAGE;
+  var init_Parser = __esm({
+    "src/parser/Parser.ts"() {
+      "use strict";
+      CODE_STATUS = class {
+        static notCode() {
+          return new CODE_STATUS(CODE_LANGUAGE.NONE);
+        }
+        constructor(language, prevLineIsComment = false) {
+          this.language = language;
+          this.nextLineIsCloze = prevLineIsComment;
+        }
+        getCommentHeaders() {
+          switch (this.language) {
+            case CODE_LANGUAGE.NONE:
+            default:
+              return ["#", "//"];
+            case CODE_LANGUAGE.PYTHON:
+              return ["#"];
+            case CODE_LANGUAGE.CPP:
+            case CODE_LANGUAGE.JAVA:
+            case CODE_LANGUAGE.JAVASCRIPT:
+              return ["//"];
+            case CODE_LANGUAGE.SQL:
+            case CODE_LANGUAGE.PLSQL:
+              return ["--"];
+            case CODE_LANGUAGE.SHELL:
+              return ["#"];
+          }
+        }
+        static getLanguageFromAlias(alias) {
+          switch (alias.toLowerCase()) {
+            case "sql":
+              return CODE_LANGUAGE.SQL;
+            case "plsql":
+              return CODE_LANGUAGE.PLSQL;
+            case "python":
+              return CODE_LANGUAGE.PYTHON;
+            case "cpp":
+              return CODE_LANGUAGE.CPP;
+            case "java":
+              return CODE_LANGUAGE.JAVA;
+            case "js":
+            case "jsx":
+              return CODE_LANGUAGE.JAVASCRIPT;
+            case "":
+              return CODE_LANGUAGE.NONE;
+            case "shell":
+            case "sh":
+              return CODE_LANGUAGE.SHELL;
+            default:
+              throw new Error("Unknown language: " + alias);
+          }
+        }
+      };
+      CODE_LANGUAGE = /* @__PURE__ */ ((CODE_LANGUAGE2) => {
+        CODE_LANGUAGE2[CODE_LANGUAGE2["NONE"] = 0] = "NONE";
+        CODE_LANGUAGE2[CODE_LANGUAGE2["PYTHON"] = 1] = "PYTHON";
+        CODE_LANGUAGE2[CODE_LANGUAGE2["CPP"] = 2] = "CPP";
+        CODE_LANGUAGE2[CODE_LANGUAGE2["JAVA"] = 3] = "JAVA";
+        CODE_LANGUAGE2[CODE_LANGUAGE2["SQL"] = 4] = "SQL";
+        CODE_LANGUAGE2[CODE_LANGUAGE2["PLSQL"] = 5] = "PLSQL";
+        CODE_LANGUAGE2[CODE_LANGUAGE2["JAVASCRIPT"] = 6] = "JAVASCRIPT";
+        CODE_LANGUAGE2[CODE_LANGUAGE2["SHELL"] = 7] = "SHELL";
+        return CODE_LANGUAGE2;
+      })(CODE_LANGUAGE || {});
     }
-    constructor(language, prevLineIsComment = false) {
-      this.language = language;
-      this.nextLineIsCloze = prevLineIsComment;
-    }
-    getCommentHeaders() {
-      switch (this.language) {
-        case CODE_LANGUAGE.NONE:
-        default:
-          return ["#", "//"];
-        case CODE_LANGUAGE.PYTHON:
-          return ["#"];
-        case CODE_LANGUAGE.CPP:
-        case CODE_LANGUAGE.JAVA:
-        case CODE_LANGUAGE.JAVASCRIPT:
-          return ["//"];
-        case CODE_LANGUAGE.SQL:
-        case CODE_LANGUAGE.PLSQL:
-          return ["--"];
-        case CODE_LANGUAGE.SHELL:
-          return ["#"];
-      }
-    }
-    static getLanguageFromAlias(alias) {
-      switch (alias.toLowerCase()) {
-        case "sql":
-          return CODE_LANGUAGE.SQL;
-        case "plsql":
-          return CODE_LANGUAGE.PLSQL;
-        case "python":
-          return CODE_LANGUAGE.PYTHON;
-        case "cpp":
-          return CODE_LANGUAGE.CPP;
-        case "java":
-          return CODE_LANGUAGE.JAVA;
-        case "js":
-        case "jsx":
-          return CODE_LANGUAGE.JAVASCRIPT;
-        case "":
-          return CODE_LANGUAGE.NONE;
-        case "shell":
-        case "sh":
-          return CODE_LANGUAGE.SHELL;
-        default:
-          throw new Error("Unknown language: " + alias);
-      }
-    }
-  };
-  var CODE_LANGUAGE = /* @__PURE__ */ ((CODE_LANGUAGE2) => {
-    CODE_LANGUAGE2[CODE_LANGUAGE2["NONE"] = 0] = "NONE";
-    CODE_LANGUAGE2[CODE_LANGUAGE2["PYTHON"] = 1] = "PYTHON";
-    CODE_LANGUAGE2[CODE_LANGUAGE2["CPP"] = 2] = "CPP";
-    CODE_LANGUAGE2[CODE_LANGUAGE2["JAVA"] = 3] = "JAVA";
-    CODE_LANGUAGE2[CODE_LANGUAGE2["SQL"] = 4] = "SQL";
-    CODE_LANGUAGE2[CODE_LANGUAGE2["PLSQL"] = 5] = "PLSQL";
-    CODE_LANGUAGE2[CODE_LANGUAGE2["JAVASCRIPT"] = 6] = "JAVASCRIPT";
-    CODE_LANGUAGE2[CODE_LANGUAGE2["SHELL"] = 7] = "SHELL";
-    return CODE_LANGUAGE2;
-  })(CODE_LANGUAGE || {});
+  });
 
-  // src/util/parser/CodeParser.ts
+  // src/parser/CodeParser.ts
   function parseMultiLineCode(line, nextLine, clozeNumber, codeStatus) {
     let returnObject;
-    if (line.startsWith("```")) {
+    if (isTripleBacktick(line)) {
       returnObject = endMultilineCode(line, nextLine, clozeNumber, codeStatus);
     } else if (isComment(line, codeStatus)) {
       returnObject = parseCodeComment(line, nextLine, clozeNumber, codeStatus);
@@ -146,7 +165,7 @@
   function parseClozifyCode(line, nextLine, clozeNumber, codeStatus) {
     const { indent, line: lineWithoutIndent } = partitionByIndent(line);
     let nextClozeNumber = clozeNumber;
-    if (isComment(nextLine, codeStatus) || isEmpty(nextLine)) {
+    if (isComment(nextLine, codeStatus) || isEmpty(nextLine) || isTripleBacktick(nextLine)) {
       codeStatus.nextLineIsCloze = false;
       nextClozeNumber++;
     } else {
@@ -187,15 +206,18 @@
   function isEmpty(line) {
     return line.trim().length === 0;
   }
+  function isTripleBacktick(line) {
+    return line.startsWith("```");
+  }
+  var init_CodeParser = __esm({
+    "src/parser/CodeParser.ts"() {
+      "use strict";
+      init_str_utils();
+      init_Parser();
+    }
+  });
 
-  // src/util/parser/TextParser.ts
-  var ALLOWED_BULLETS = ["\\d*\\.", "-"];
-  var ALLOWED_SEPARATORS = ["-", "="];
-  var PARSED_BULLET_REGEX = ALLOWED_BULLETS.join("|");
-  var PARSED_SEPARATOR_REGEX = ALLOWED_SEPARATORS.join("|");
-  var BULLET_SEPARATOR_REGEX = new RegExp(
-    "(?<=^\\s*)(?<bullet>" + PARSED_BULLET_REGEX + ")\\s+(?<front>(?:(?!( = | - )).)*)\\s+(?<separator>" + PARSED_SEPARATOR_REGEX + ")\\s+(?<back>.*)"
-  );
+  // src/parser/TextParser.ts
   function parseText(line, clozeNumber, preCloze = true) {
     if (/\n/.test(line)) {
       throw new Error("Line cannot contain \\n. Line is " + line);
@@ -271,9 +293,24 @@
       back
     };
   }
+  var ALLOWED_BULLETS, ALLOWED_SEPARATORS, PARSED_BULLET_REGEX, PARSED_SEPARATOR_REGEX, BULLET_SEPARATOR_REGEX;
+  var init_TextParser = __esm({
+    "src/parser/TextParser.ts"() {
+      "use strict";
+      init_str_utils();
+      init_Parser();
+      ALLOWED_BULLETS = ["\\d*\\.", "-"];
+      ALLOWED_SEPARATORS = ["-", "="];
+      PARSED_BULLET_REGEX = ALLOWED_BULLETS.join("|");
+      PARSED_SEPARATOR_REGEX = ALLOWED_SEPARATORS.join("|");
+      BULLET_SEPARATOR_REGEX = new RegExp(
+        "(?<=^\\s*)(?<bullet>" + PARSED_BULLET_REGEX + ")\\s+(?<front>(?:(?!( = | - )).)*)\\s+(?<separator>" + PARSED_SEPARATOR_REGEX + ")\\s+(?<back>.*)"
+      );
+    }
+  });
 
-  // src/main_no_precloze.ts
-  function parse(text) {
+  // src/main.ts
+  function parse(text, preCloze) {
     let clozeNumber = 1;
     let currentState = 0 /* TEXT */;
     let codeStatus = CODE_STATUS.notCode();
@@ -283,11 +320,11 @@
       ({ left: nextLine, right: text } = partition(text, "\n"));
       let parsedObject;
       if (currentState === 0 /* TEXT */) {
-        parsedObject = parseText(nextLine, clozeNumber, false);
+        parsedObject = parseText(nextLine, clozeNumber, preCloze);
       } else if (currentState === 4 /* MULTI_LINE_CODE */) {
         parsedObject = parseMultiLineCode(nextLine, partition(text, "\n").left, clozeNumber, codeStatus);
       } else if (currentState === 3 /* MULTI_LINE_LATEX */) {
-        parsedObject = parseText(nextLine, clozeNumber, false);
+        parsedObject = parseText(nextLine, clozeNumber, preCloze);
       } else {
         throw new Error("Invalid State: " + currentState);
       }
@@ -296,5 +333,26 @@
     }
     return resultLines.join("\n");
   }
-  module.exports = parse;
+  var parseWithoutPreCloze, parseWithPreCloze;
+  var init_main = __esm({
+    "src/main.ts"() {
+      "use strict";
+      init_str_utils();
+      init_CodeParser();
+      init_Parser();
+      init_TextParser();
+      parseWithoutPreCloze = (text) => parse(text, false);
+      parseWithPreCloze = (text) => parse(text, true);
+      module.exports = parseWithPreCloze;
+    }
+  });
+
+  // src/main_no_precloze.ts
+  var require_main_no_precloze = __commonJS({
+    "src/main_no_precloze.ts"(exports, module2) {
+      init_main();
+      module2.exports = parseWithoutPreCloze;
+    }
+  });
+  require_main_no_precloze();
 })();
