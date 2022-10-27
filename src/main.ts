@@ -1,7 +1,7 @@
 import { partition } from "./util/str_utils";
-import { parseMultiLineCode } from "./util/parser/CodeParser";
-import { CODE_STATUS, ParseOutput, STATE } from "./util/parser/Parser";
-import { parseText as parseTextLine } from "./util/parser/TextParser";
+import { parseMultiLineCode } from "./parser/CodeParser";
+import { CODE_STATUS, ParseOutput, STATE } from "./parser/Parser";
+import { parseText as parseTextLine } from "./parser/TextParser";
 
 function parse(text: string, preCloze: boolean): string {
     let clozeNumber = 1;
