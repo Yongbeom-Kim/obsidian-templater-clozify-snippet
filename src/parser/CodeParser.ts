@@ -37,6 +37,11 @@ function endMultilineCode(
     codeStatus: CODE_STATUS
 ) {
     codeStatus.nextLineIsCloze = false;
+
+    // Increment cloze number by 1 if next line is cloze
+    if (codeStatus.nextLineIsCloze) {
+        clozeNumber += 1;
+    }
     return {
         result: "",
         clozeNumber,
