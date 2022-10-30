@@ -46,6 +46,8 @@ export class CODE_STATUS {
                 return ["--"];
             case CODE_LANGUAGE.SHELL:
                 return ["#"];
+            case CODE_LANGUAGE.CSS:
+                return ["/*"];
         }
     }
 
@@ -69,6 +71,8 @@ export class CODE_STATUS {
             case 'shell':
             case 'sh':
                 return CODE_LANGUAGE.SHELL;
+            case 'css':
+                return CODE_LANGUAGE.CSS;
             default:
                 throw new Error("Unknown language: " + alias);
         }
@@ -88,6 +92,7 @@ export enum CODE_LANGUAGE {
     SQL,
     PLSQL,
     JAVASCRIPT,
-    SHELL
+    SHELL,
+    CSS
 }
 

@@ -60,6 +60,8 @@
           return ["--"];
         case CODE_LANGUAGE.SHELL:
           return ["#"];
+        case CODE_LANGUAGE.CSS:
+          return ["/*"];
       }
     }
     static getLanguageFromAlias(alias) {
@@ -82,6 +84,8 @@
         case "shell":
         case "sh":
           return CODE_LANGUAGE.SHELL;
+        case "css":
+          return CODE_LANGUAGE.CSS;
         default:
           throw new Error("Unknown language: " + alias);
       }
@@ -96,6 +100,7 @@
     CODE_LANGUAGE2[CODE_LANGUAGE2["PLSQL"] = 5] = "PLSQL";
     CODE_LANGUAGE2[CODE_LANGUAGE2["JAVASCRIPT"] = 6] = "JAVASCRIPT";
     CODE_LANGUAGE2[CODE_LANGUAGE2["SHELL"] = 7] = "SHELL";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["CSS"] = 8] = "CSS";
     return CODE_LANGUAGE2;
   })(CODE_LANGUAGE || {});
 
