@@ -3,7 +3,7 @@ import { parseMultiLineCode } from "./parser/CodeParser";
 import { CODE_STATUS, ParseOutput, STATE } from "./parser/Parser";
 import { parseText as parseTextLine } from "./parser/TextParser";
 
-function parse(text: string, preCloze: boolean): string {
+function parse(text: string, preCloze: boolean = true): string {
     let clozeNumber = 1;
     let currentState: STATE = STATE.TEXT;
     let codeStatus = CODE_STATUS.notCode();
@@ -37,7 +37,8 @@ function parse(text: string, preCloze: boolean): string {
     return resultLines.join("\n");
 }
 
+// I need this export statment for this to be treated as an ECMAScript module
 export const parseWithoutPreCloze = (text: string) => parse(text, false);
-const parseWithPreCloze = (text: string) => parse(text, true);
 
-module.exports = parseWithPreCloze;
+const export_fn = (text: string, preCloze: boolean) => parse(text, preCloze);
+module.exports = export_fn;

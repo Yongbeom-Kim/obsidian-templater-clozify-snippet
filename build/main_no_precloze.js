@@ -315,7 +315,7 @@
   });
 
   // src/main.ts
-  function parse(text, preCloze) {
+  function parse(text, preCloze = true) {
     let clozeNumber = 1;
     let currentState = 0 /* TEXT */;
     let codeStatus = CODE_STATUS.notCode();
@@ -338,7 +338,7 @@
     }
     return resultLines.join("\n");
   }
-  var parseWithoutPreCloze, parseWithPreCloze;
+  var parseWithoutPreCloze, export_fn;
   var init_main = __esm({
     "src/main.ts"() {
       "use strict";
@@ -347,8 +347,8 @@
       init_Parser();
       init_TextParser();
       parseWithoutPreCloze = (text) => parse(text, false);
-      parseWithPreCloze = (text) => parse(text, true);
-      module.exports = parseWithPreCloze;
+      export_fn = (text, preCloze) => parse(text, preCloze);
+      module.exports = export_fn;
     }
   });
 

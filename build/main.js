@@ -281,7 +281,7 @@
   }
 
   // src/main.ts
-  function parse(text, preCloze) {
+  function parse(text, preCloze = true) {
     let clozeNumber = 1;
     let currentState = 0 /* TEXT */;
     let codeStatus = CODE_STATUS.notCode();
@@ -305,6 +305,6 @@
     return resultLines.join("\n");
   }
   var parseWithoutPreCloze = (text) => parse(text, false);
-  var parseWithPreCloze = (text) => parse(text, true);
-  module.exports = parseWithPreCloze;
+  var export_fn = (text, preCloze) => parse(text, preCloze);
+  module.exports = export_fn;
 })();
