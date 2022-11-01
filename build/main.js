@@ -50,6 +50,8 @@
         default:
           return ["#", "//"];
         case CODE_LANGUAGE.PYTHON:
+        case CODE_LANGUAGE.SHELL:
+        case CODE_LANGUAGE.DOCKERFILE:
           return ["#"];
         case CODE_LANGUAGE.CPP:
         case CODE_LANGUAGE.JAVA:
@@ -58,8 +60,6 @@
         case CODE_LANGUAGE.SQL:
         case CODE_LANGUAGE.PLSQL:
           return ["--"];
-        case CODE_LANGUAGE.SHELL:
-          return ["#"];
         case CODE_LANGUAGE.CSS:
           return ["/*"];
       }
@@ -86,6 +86,8 @@
           return CODE_LANGUAGE.SHELL;
         case "css":
           return CODE_LANGUAGE.CSS;
+        case "dockerfile":
+          return CODE_LANGUAGE.DOCKERFILE;
         default:
           throw new Error("Unknown language: " + alias);
       }
@@ -101,6 +103,7 @@
     CODE_LANGUAGE2[CODE_LANGUAGE2["JAVASCRIPT"] = 6] = "JAVASCRIPT";
     CODE_LANGUAGE2[CODE_LANGUAGE2["SHELL"] = 7] = "SHELL";
     CODE_LANGUAGE2[CODE_LANGUAGE2["CSS"] = 8] = "CSS";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["DOCKERFILE"] = 9] = "DOCKERFILE";
     return CODE_LANGUAGE2;
   })(CODE_LANGUAGE || {});
 

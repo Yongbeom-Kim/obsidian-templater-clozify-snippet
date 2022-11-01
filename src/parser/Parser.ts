@@ -36,6 +36,8 @@ export class CODE_STATUS {
             default:
                 return ["#", "//"]
             case CODE_LANGUAGE.PYTHON:
+            case CODE_LANGUAGE.SHELL:
+            case CODE_LANGUAGE.DOCKERFILE:
                 return ["#"]
             case CODE_LANGUAGE.CPP:
             case CODE_LANGUAGE.JAVA:
@@ -44,8 +46,6 @@ export class CODE_STATUS {
             case CODE_LANGUAGE.SQL:
             case CODE_LANGUAGE.PLSQL:
                 return ["--"];
-            case CODE_LANGUAGE.SHELL:
-                return ["#"];
             case CODE_LANGUAGE.CSS:
                 return ["/*"];
         }
@@ -73,6 +73,8 @@ export class CODE_STATUS {
                 return CODE_LANGUAGE.SHELL;
             case 'css':
                 return CODE_LANGUAGE.CSS;
+            case 'dockerfile':
+                return CODE_LANGUAGE.DOCKERFILE;
             default:
                 throw new Error("Unknown language: " + alias);
         }
@@ -93,6 +95,7 @@ export enum CODE_LANGUAGE {
     PLSQL,
     JAVASCRIPT,
     SHELL,
-    CSS
+    CSS,
+    DOCKERFILE
 }
 
