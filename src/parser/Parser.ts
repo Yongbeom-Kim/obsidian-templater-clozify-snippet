@@ -38,10 +38,12 @@ export class CODE_STATUS {
             case CODE_LANGUAGE.PYTHON:
             case CODE_LANGUAGE.SHELL:
             case CODE_LANGUAGE.DOCKERFILE:
+            case CODE_LANGUAGE.TOML:
                 return ["#"]
             case CODE_LANGUAGE.CPP:
             case CODE_LANGUAGE.JAVA:
             case CODE_LANGUAGE.JAVASCRIPT:
+            case CODE_LANGUAGE.RUST:
                 return ["//"]
             case CODE_LANGUAGE.SQL:
             case CODE_LANGUAGE.PLSQL:
@@ -60,6 +62,7 @@ export class CODE_STATUS {
             case 'python':
                 return CODE_LANGUAGE.PYTHON;
             case 'cpp':
+            case 'c++':
                 return CODE_LANGUAGE.CPP;
             case 'java':
                 return CODE_LANGUAGE.JAVA;
@@ -75,6 +78,10 @@ export class CODE_STATUS {
                 return CODE_LANGUAGE.CSS;
             case 'dockerfile':
                 return CODE_LANGUAGE.DOCKERFILE;
+            case 'rust':
+                return CODE_LANGUAGE.RUST;
+            case 'toml':
+                return CODE_LANGUAGE.TOML;
             default:
                 throw new Error("Unknown language: " + alias);
         }
@@ -96,6 +103,8 @@ export enum CODE_LANGUAGE {
     JAVASCRIPT,
     SHELL,
     CSS,
-    DOCKERFILE
+    DOCKERFILE,
+    RUST,
+    TOML
 }
 
