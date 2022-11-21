@@ -34,6 +34,9 @@
   function makePreCloze(str, clozeNumber) {
     return `{{c${clozeNumber}:::: ${str} }}`;
   }
+  function correctDoubleColon(str) {
+    return str.replaceAll("::", ":\u200D:");
+  }
 
   // src/parser/Parser.ts
   var CODE_STATUS = class {
@@ -52,6 +55,7 @@
         case CODE_LANGUAGE.PYTHON:
         case CODE_LANGUAGE.SHELL:
         case CODE_LANGUAGE.DOCKERFILE:
+        case CODE_LANGUAGE.TOML:
           return ["#"];
         case CODE_LANGUAGE.CPP:
         case CODE_LANGUAGE.JAVA:
@@ -63,6 +67,8 @@
           return ["--"];
         case CODE_LANGUAGE.CSS:
           return ["/*"];
+        case CODE_LANGUAGE.HTML:
+          return ["<!--"];
       }
     }
     static getLanguageFromAlias(alias) {
@@ -92,6 +98,10 @@
           return CODE_LANGUAGE.DOCKERFILE;
         case "rust":
           return CODE_LANGUAGE.RUST;
+        case "toml":
+          return CODE_LANGUAGE.TOML;
+        case "html":
+          return CODE_LANGUAGE.HTML;
         default:
           throw new Error("Unknown language: " + alias);
       }
@@ -109,6 +119,8 @@
     CODE_LANGUAGE2[CODE_LANGUAGE2["CSS"] = 8] = "CSS";
     CODE_LANGUAGE2[CODE_LANGUAGE2["DOCKERFILE"] = 9] = "DOCKERFILE";
     CODE_LANGUAGE2[CODE_LANGUAGE2["RUST"] = 10] = "RUST";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["TOML"] = 11] = "TOML";
+    CODE_LANGUAGE2[CODE_LANGUAGE2["HTML"] = 12] = "HTML";
     return CODE_LANGUAGE2;
   })(CODE_LANGUAGE || {});
 
@@ -297,6 +309,7 @@
     let resultLines = [];
     while (text.length > 0) {
       ({ left: nextLine, right: text } = partition(text, "\n"));
+      nextLine = correctDoubleColon(nextLine);
       let parsedObject;
       if (currentState === 0 /* TEXT */) {
         parsedObject = parseText(nextLine, clozeNumber, preCloze);

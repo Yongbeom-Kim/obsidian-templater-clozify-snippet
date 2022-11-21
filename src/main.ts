@@ -1,4 +1,4 @@
-import { partition } from "./util/str_utils";
+import { correctDoubleColon, partition } from "./util/str_utils";
 import { parseMultiLineCode } from "./parser/CodeParser";
 import { CODE_STATUS, ParseOutput, STATE } from "./parser/Parser";
 import { parseText as parseTextLine } from "./parser/TextParser";
@@ -14,6 +14,8 @@ function parse(text: string, preCloze: boolean = true): string {
         // Get next line 
         // TODO: Null safety here
         ({ left: nextLine, right: text } = partition(text, "\n"));
+        
+        nextLine = correctDoubleColon(nextLine);
         
         let parsedObject: ParseOutput;
         if (currentState === STATE.TEXT) {
@@ -42,3 +44,4 @@ export const parseWithoutPreCloze = (text: string) => parse(text, false);
 
 const export_fn = (text: string, preCloze: boolean) => parse(text, preCloze);
 module.exports = export_fn;
+

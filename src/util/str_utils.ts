@@ -68,3 +68,10 @@ export function makeCloze(str: string, clozeNumber: number): string {
 export function makePreCloze(str: string, clozeNumber: number): string {
     return `{{c${clozeNumber}:::: ${str} }}`;
 }
+
+/**
+ * Corrects the :: character in a string (prevent cloze problems.)
+ */
+export function correctDoubleColon(str: string) {
+    return str.replaceAll("::", ":‍:");
+}

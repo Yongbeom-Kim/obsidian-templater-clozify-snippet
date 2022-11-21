@@ -50,6 +50,8 @@ export class CODE_STATUS {
                 return ["--"];
             case CODE_LANGUAGE.CSS:
                 return ["/*"];
+            case CODE_LANGUAGE.HTML:
+                return ['<!--']
         }
     }
 
@@ -82,6 +84,8 @@ export class CODE_STATUS {
                 return CODE_LANGUAGE.RUST;
             case 'toml':
                 return CODE_LANGUAGE.TOML;
+            case 'html':
+                return CODE_LANGUAGE.HTML;
             default:
                 throw new Error("Unknown language: " + alias);
         }
@@ -105,6 +109,7 @@ export enum CODE_LANGUAGE {
     CSS,
     DOCKERFILE,
     RUST,
-    TOML
+    TOML,
+    HTML
 }
 
