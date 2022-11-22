@@ -120,8 +120,9 @@ function parseNonClozifyCode(line: string,
     clozeNumber: number,
     codeStatus: CODE_STATUS
 ): ParseOutput {
+    const {indent, line: lineWithoutIndent} = partitionByIndent(line);
     return {
-        result: addBackTicks(line),
+        result: addBackTicks(processIndent(indent) + lineWithoutIndent),
         clozeNumber,
         state: STATE.MULTI_LINE_CODE,
         codeStatus

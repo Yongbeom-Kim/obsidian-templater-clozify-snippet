@@ -204,8 +204,9 @@
     };
   }
   function parseNonClozifyCode(line, nextLine, clozeNumber, codeStatus) {
+    const { indent, line: lineWithoutIndent } = partitionByIndent(line);
     return {
-      result: addBackTicks(line),
+      result: addBackTicks(processIndent(indent) + lineWithoutIndent),
       clozeNumber,
       state: 4 /* MULTI_LINE_CODE */,
       codeStatus
