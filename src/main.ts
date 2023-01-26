@@ -43,5 +43,6 @@ function parse(text: string, preCloze: boolean = true): string {
 export const parseWithoutPreCloze = (text: string) => parse(text, false);
 
 const export_fn = (text: string, preCloze: boolean) => parse(text, preCloze);
+
 module.exports = export_fn;
 

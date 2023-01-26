@@ -3,7 +3,8 @@
  * @param text 
  */
 function replace_dollar(text: string): string {
+    
     return text.replaceAll('$', '＄');
 }
 
-module.exports = replace_dollar
+module.exports = replace_dollar;
