@@ -82,6 +82,7 @@ var CODE_STATUS = class {
       case CODE_LANGUAGE.TOML:
         return ["#"];
       case CODE_LANGUAGE.CPP:
+      case CODE_LANGUAGE.C:
       case CODE_LANGUAGE.JAVA:
       case CODE_LANGUAGE.JAVASCRIPT:
       case CODE_LANGUAGE.RUST:
@@ -106,6 +107,8 @@ var CODE_STATUS = class {
       case "cpp":
       case "c++":
         return CODE_LANGUAGE.CPP;
+      case "c":
+        return CODE_LANGUAGE.C;
       case "java":
         return CODE_LANGUAGE.JAVA;
       case "js":
@@ -145,6 +148,7 @@ var CODE_LANGUAGE = /* @__PURE__ */ ((CODE_LANGUAGE2) => {
   CODE_LANGUAGE2[CODE_LANGUAGE2["RUST"] = 10] = "RUST";
   CODE_LANGUAGE2[CODE_LANGUAGE2["TOML"] = 11] = "TOML";
   CODE_LANGUAGE2[CODE_LANGUAGE2["HTML"] = 12] = "HTML";
+  CODE_LANGUAGE2[CODE_LANGUAGE2["C"] = 13] = "C";
   return CODE_LANGUAGE2;
 })(CODE_LANGUAGE || {});
 

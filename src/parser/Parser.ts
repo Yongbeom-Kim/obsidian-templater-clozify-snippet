@@ -41,6 +41,7 @@ export class CODE_STATUS {
             case CODE_LANGUAGE.TOML:
                 return ["#"]
             case CODE_LANGUAGE.CPP:
+            case CODE_LANGUAGE.C:
             case CODE_LANGUAGE.JAVA:
             case CODE_LANGUAGE.JAVASCRIPT:
             case CODE_LANGUAGE.RUST:
@@ -66,6 +67,8 @@ export class CODE_STATUS {
             case 'cpp':
             case 'c++':
                 return CODE_LANGUAGE.CPP;
+            case 'c':
+                return CODE_LANGUAGE.C;
             case 'java':
                 return CODE_LANGUAGE.JAVA;
             case 'js':
@@ -110,6 +113,7 @@ export enum CODE_LANGUAGE {
     DOCKERFILE,
     RUST,
     TOML,
-    HTML
+    HTML,
+    C
 }
 
