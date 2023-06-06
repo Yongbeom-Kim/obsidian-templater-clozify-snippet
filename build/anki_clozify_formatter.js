@@ -1,4 +1,28 @@
 "use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// src/anki_clozify_formatter.ts
+var anki_clozify_formatter_exports = {};
+__export(anki_clozify_formatter_exports, {
+  parseWithoutPreCloze: () => parseWithoutPreCloze
+});
+module.exports = __toCommonJS(anki_clozify_formatter_exports);
 
 // src/util/str_utils.ts
 function partition(str, delimiter) {
@@ -305,7 +329,7 @@ function shiftSeparatorToNextDelimiter(front, current_separator, back, delimiter
   };
 }
 
-// src/main.ts
+// src/anki_clozify_formatter.ts
 function parse(text, preCloze = true) {
   let clozeNumber = 1;
   let currentState = 0 /* TEXT */;
@@ -333,6 +357,3 @@ function parse(text, preCloze = true) {
 var parseWithoutPreCloze = (text) => parse(text, false);
 var export_fn = (text, preCloze) => parse(text, preCloze);
 module.exports = export_fn;
-
-// src/main_no_precloze.ts
-module.exports = parseWithoutPreCloze;
