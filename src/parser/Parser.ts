@@ -39,6 +39,7 @@ export class CODE_STATUS {
             case CODE_LANGUAGE.SHELL:
             case CODE_LANGUAGE.DOCKERFILE:
             case CODE_LANGUAGE.TOML:
+            case CODE_LANGUAGE.BASH:
                 return ["#"]
             case CODE_LANGUAGE.CPP:
             case CODE_LANGUAGE.C:
@@ -89,6 +90,8 @@ export class CODE_STATUS {
                 return CODE_LANGUAGE.TOML;
             case 'html':
                 return CODE_LANGUAGE.HTML;
+            case 'bash':
+                return CODE_LANGUAGE.BASH;
             default:
                 throw new Error("Unknown language: " + alias);
         }
@@ -114,6 +117,7 @@ export enum CODE_LANGUAGE {
     RUST,
     TOML,
     HTML,
-    C
+    C,
+    BASH
 }
 

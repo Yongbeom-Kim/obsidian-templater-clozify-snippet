@@ -80,6 +80,7 @@ var CODE_STATUS = class {
       case CODE_LANGUAGE.SHELL:
       case CODE_LANGUAGE.DOCKERFILE:
       case CODE_LANGUAGE.TOML:
+      case CODE_LANGUAGE.BASH:
         return ["#"];
       case CODE_LANGUAGE.CPP:
       case CODE_LANGUAGE.C:
@@ -129,6 +130,8 @@ var CODE_STATUS = class {
         return CODE_LANGUAGE.TOML;
       case "html":
         return CODE_LANGUAGE.HTML;
+      case "bash":
+        return CODE_LANGUAGE.BASH;
       default:
         throw new Error("Unknown language: " + alias);
     }
@@ -149,6 +152,7 @@ var CODE_LANGUAGE = /* @__PURE__ */ ((CODE_LANGUAGE2) => {
   CODE_LANGUAGE2[CODE_LANGUAGE2["TOML"] = 11] = "TOML";
   CODE_LANGUAGE2[CODE_LANGUAGE2["HTML"] = 12] = "HTML";
   CODE_LANGUAGE2[CODE_LANGUAGE2["C"] = 13] = "C";
+  CODE_LANGUAGE2[CODE_LANGUAGE2["BASH"] = 14] = "BASH";
   return CODE_LANGUAGE2;
 })(CODE_LANGUAGE || {});
 
