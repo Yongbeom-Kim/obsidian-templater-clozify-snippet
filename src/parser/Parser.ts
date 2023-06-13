@@ -45,6 +45,7 @@ export class CODE_STATUS {
             case CODE_LANGUAGE.C:
             case CODE_LANGUAGE.JAVA:
             case CODE_LANGUAGE.JAVASCRIPT:
+            case CODE_LANGUAGE.TYPESCRIPT:
             case CODE_LANGUAGE.RUST:
                 return ["//"]
             case CODE_LANGUAGE.SQL:
@@ -75,6 +76,8 @@ export class CODE_STATUS {
             case 'js':
             case 'jsx':
                 return CODE_LANGUAGE.JAVASCRIPT;
+            case 'ts':
+                return CODE_LANGUAGE.TYPESCRIPT;
             case '':
                 return CODE_LANGUAGE.NONE;
             case 'shell':
@@ -118,6 +121,7 @@ export enum CODE_LANGUAGE {
     TOML,
     HTML,
     C,
-    BASH
+    BASH,
+    TYPESCRIPT
 }
 

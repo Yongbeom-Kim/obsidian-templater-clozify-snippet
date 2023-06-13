@@ -86,6 +86,7 @@ var CODE_STATUS = class {
       case CODE_LANGUAGE.C:
       case CODE_LANGUAGE.JAVA:
       case CODE_LANGUAGE.JAVASCRIPT:
+      case CODE_LANGUAGE.TYPESCRIPT:
       case CODE_LANGUAGE.RUST:
         return ["//"];
       case CODE_LANGUAGE.SQL:
@@ -115,6 +116,8 @@ var CODE_STATUS = class {
       case "js":
       case "jsx":
         return CODE_LANGUAGE.JAVASCRIPT;
+      case "ts":
+        return CODE_LANGUAGE.TYPESCRIPT;
       case "":
         return CODE_LANGUAGE.NONE;
       case "shell":
@@ -153,6 +156,7 @@ var CODE_LANGUAGE = /* @__PURE__ */ ((CODE_LANGUAGE2) => {
   CODE_LANGUAGE2[CODE_LANGUAGE2["HTML"] = 12] = "HTML";
   CODE_LANGUAGE2[CODE_LANGUAGE2["C"] = 13] = "C";
   CODE_LANGUAGE2[CODE_LANGUAGE2["BASH"] = 14] = "BASH";
+  CODE_LANGUAGE2[CODE_LANGUAGE2["TYPESCRIPT"] = 15] = "TYPESCRIPT";
   return CODE_LANGUAGE2;
 })(CODE_LANGUAGE || {});
 
