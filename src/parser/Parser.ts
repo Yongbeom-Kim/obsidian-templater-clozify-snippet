@@ -40,6 +40,8 @@ export class CODE_STATUS {
             case CODE_LANGUAGE.DOCKERFILE:
             case CODE_LANGUAGE.TOML:
             case CODE_LANGUAGE.BASH:
+            case CODE_LANGUAGE.MAKEFILE:
+            case CODE_LANGUAGE.YAML:
                 return ["#"]
             case CODE_LANGUAGE.CPP:
             case CODE_LANGUAGE.C:
@@ -95,6 +97,11 @@ export class CODE_STATUS {
                 return CODE_LANGUAGE.HTML;
             case 'bash':
                 return CODE_LANGUAGE.BASH;
+            case 'make':
+            case 'makefile':
+                return CODE_LANGUAGE.MAKEFILE;
+            case 'yaml':
+                return CODE_LANGUAGE.YAML
             default:
                 throw new Error("Unknown language: " + alias);
         }
@@ -122,6 +129,8 @@ export enum CODE_LANGUAGE {
     HTML,
     C,
     BASH,
-    TYPESCRIPT
+    TYPESCRIPT,
+    MAKEFILE,
+    YAML
 }
 

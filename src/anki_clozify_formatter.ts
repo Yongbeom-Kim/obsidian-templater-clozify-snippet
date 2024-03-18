@@ -2,6 +2,7 @@ import { correctDoubleColon, partition } from "./util/str_utils";
 import { parseMultiLineCode } from "./parser/CodeParser";
 import { CODE_STATUS, ParseOutput, STATE } from "./parser/Parser";
 import { parseText as parseTextLine } from "./parser/TextParser";
+import { replace_dollar } from "./replace_dollar";
 
 function parse(text: string, preCloze: boolean = true): string {
     let clozeNumber = 1;
@@ -36,7 +37,7 @@ function parse(text: string, preCloze: boolean = true): string {
         ({clozeNumber, state: currentState, codeStatus} = parsedObject);
     }
 
-    return resultLines.join("\n");
+    return replace_dollar(resultLines.join("\n"));
 }
 
 // I need this export statment for this to be treated as an ECMAScript module
