@@ -57,6 +57,8 @@ var CODE_STATUS = class {
       case CODE_LANGUAGE.DOCKERFILE:
       case CODE_LANGUAGE.TOML:
       case CODE_LANGUAGE.BASH:
+      case CODE_LANGUAGE.MAKEFILE:
+      case CODE_LANGUAGE.YAML:
         return ["#"];
       case CODE_LANGUAGE.CPP:
       case CODE_LANGUAGE.C:
@@ -111,6 +113,11 @@ var CODE_STATUS = class {
         return CODE_LANGUAGE.HTML;
       case "bash":
         return CODE_LANGUAGE.BASH;
+      case "make":
+      case "makefile":
+        return CODE_LANGUAGE.MAKEFILE;
+      case "yaml":
+        return CODE_LANGUAGE.YAML;
       default:
         throw new Error("Unknown language: " + alias);
     }
@@ -133,6 +140,8 @@ var CODE_LANGUAGE = /* @__PURE__ */ ((CODE_LANGUAGE2) => {
   CODE_LANGUAGE2[CODE_LANGUAGE2["C"] = 13] = "C";
   CODE_LANGUAGE2[CODE_LANGUAGE2["BASH"] = 14] = "BASH";
   CODE_LANGUAGE2[CODE_LANGUAGE2["TYPESCRIPT"] = 15] = "TYPESCRIPT";
+  CODE_LANGUAGE2[CODE_LANGUAGE2["MAKEFILE"] = 16] = "MAKEFILE";
+  CODE_LANGUAGE2[CODE_LANGUAGE2["YAML"] = 17] = "YAML";
   return CODE_LANGUAGE2;
 })(CODE_LANGUAGE || {});
 
@@ -313,6 +322,11 @@ function shiftSeparatorToNextDelimiter(front, current_separator, back, delimiter
   };
 }
 
+// src/replace_dollar.ts
+function replace_dollar(text) {
+  return text.replaceAll("$", "\uFF04");
+}
+
 // src/anki_clozify_formatter.ts
 function parse(text, preCloze = true) {
   let clozeNumber = 1;
@@ -336,7 +350,7 @@ function parse(text, preCloze = true) {
     resultLines.push(parsedObject.result);
     ({ clozeNumber, state: currentState, codeStatus } = parsedObject);
   }
-  return resultLines.join("\n");
+  return replace_dollar(resultLines.join("\n"));
 }
 var parseWithoutPreCloze = (text) => parse(text, false);
 var export_fn = (text, preCloze) => parse(text, preCloze);
